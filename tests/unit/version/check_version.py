@@ -15,18 +15,30 @@
 
 from mock import Mock
 
+<<<<<<< HEAD
 from kafkatest.version import DEV_BRANCH, V_0_8_2_2, get_version
+=======
+from kafkatest.version import TRUNK, V_0_8_2_2, get_version
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 class CheckVersion(object):
     def check_get_version(self):
         """Check default and override behavior of get_version"""
         node = None
+<<<<<<< HEAD
         assert get_version(node) == DEV_BRANCH
 
         node = Mock()
         node.version = None
         assert get_version(node) == DEV_BRANCH
+=======
+        assert get_version(node) == TRUNK
+
+        node = Mock()
+        node.version = None
+        assert get_version(node) == TRUNK
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         node = Mock()
         node.version = V_0_8_2_2

@@ -39,6 +39,10 @@ import org.apache.kafka.common.requests.ApiVersionsRequest;
 import org.apache.kafka.common.requests.ApiVersionsResponse;
 import org.apache.kafka.common.requests.MetadataRequest;
 import org.apache.kafka.common.requests.RequestHeader;
+<<<<<<< HEAD
+=======
+import org.apache.kafka.common.requests.RequestSend;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.common.requests.ResponseHeader;
 import org.apache.kafka.common.requests.SaslHandshakeRequest;
 import org.apache.kafka.common.requests.SaslHandshakeResponse;
@@ -387,18 +391,30 @@ public class SaslAuthenticatorTest {
     public void testApiVersionsRequestWithUnsupportedVersion() throws Exception {
         SecurityProtocol securityProtocol = SecurityProtocol.SASL_PLAINTEXT;
         configureMechanisms("PLAIN", Arrays.asList("PLAIN"));
+<<<<<<< HEAD
         server = createEchoServer(securityProtocol);
+=======
+        server = NetworkTestUtils.createEchoServer(securityProtocol, saslServerConfigs);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         // Send ApiVersionsRequest with unsupported version and validate error response.
         String node = "1";
         createClientConnection(SecurityProtocol.PLAINTEXT, node);
         RequestHeader header = new RequestHeader(ApiKeys.API_VERSIONS.id, Short.MAX_VALUE, "someclient", 1);
+<<<<<<< HEAD
         ApiVersionsRequest request = new ApiVersionsRequest.Builder().build();
         selector.send(request.toSend(node, header));
         ByteBuffer responseBuffer = waitForResponse();
         ResponseHeader.parse(responseBuffer);
         ApiVersionsResponse response = ApiVersionsResponse.parse(responseBuffer, (short) 0);
         assertEquals(Errors.UNSUPPORTED_VERSION, response.error());
+=======
+        selector.send(new NetworkSend(node, RequestSend.serialize(header, new ApiVersionsRequest().toStruct())));
+        ByteBuffer responseBuffer = waitForResponse();
+        ResponseHeader.parse(responseBuffer);
+        ApiVersionsResponse response = ApiVersionsResponse.parse(responseBuffer);
+        assertEquals(Errors.UNSUPPORTED_VERSION.code(), response.errorCode());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         // Send ApiVersionsRequest with a supported version. This should succeed.
         sendVersionRequestReceiveResponse(node);
@@ -419,15 +435,25 @@ public class SaslAuthenticatorTest {
     public void testSaslHandshakeRequestWithUnsupportedVersion() throws Exception {
         SecurityProtocol securityProtocol = SecurityProtocol.SASL_PLAINTEXT;
         configureMechanisms("PLAIN", Arrays.asList("PLAIN"));
+<<<<<<< HEAD
         server = createEchoServer(securityProtocol);
+=======
+        server = NetworkTestUtils.createEchoServer(securityProtocol, saslServerConfigs);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         // Send ApiVersionsRequest and validate error response.
         String node1 = "invalid1";
         createClientConnection(SecurityProtocol.PLAINTEXT, node1);
+<<<<<<< HEAD
         SaslHandshakeRequest request = new SaslHandshakeRequest("PLAIN");
         RequestHeader header = new RequestHeader(ApiKeys.SASL_HANDSHAKE.id, Short.MAX_VALUE, "someclient", 2);
         selector.send(request.toSend(node1, header));
         NetworkTestUtils.waitForChannelClose(selector, node1, ChannelState.READY);
+=======
+        RequestHeader header = new RequestHeader(ApiKeys.SASL_HANDSHAKE.id, Short.MAX_VALUE, "someclient", 2);
+        selector.send(new NetworkSend(node1, RequestSend.serialize(header, new SaslHandshakeRequest("PLAIN").toStruct())));
+        NetworkTestUtils.waitForChannelClose(selector, node1);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         selector.close();
 
         // Test good connection still works

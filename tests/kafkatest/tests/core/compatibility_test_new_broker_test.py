@@ -14,7 +14,10 @@
 
 from ducktape.mark import parametrize
 from ducktape.utils.util import wait_until
+<<<<<<< HEAD
 from ducktape.mark.resource import cluster
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 from kafkatest.services.console_consumer import ConsoleConsumer
 from kafkatest.services.kafka import KafkaService
@@ -23,7 +26,12 @@ from kafkatest.services.verifiable_producer import VerifiableProducer
 from kafkatest.services.zookeeper import ZookeeperService
 from kafkatest.tests.produce_consume_validate import ProduceConsumeValidateTest
 from kafkatest.utils import is_int
+<<<<<<< HEAD
 from kafkatest.version import LATEST_0_8_2, LATEST_0_9, LATEST_0_10_0, LATEST_0_10_1, LATEST_0_10_2, LATEST_0_11_0, DEV_BRANCH, KafkaVersion
+=======
+from kafkatest.version import LATEST_0_9, LATEST_0_8_2, TRUNK, KafkaVersion
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 # Compatibility tests for moving to a new broker (e.g., 0.10.x) and using a mix of old and new clients (e.g., 0.9.x)
 class ClientCompatibilityTestNewBroker(ProduceConsumeValidateTest):

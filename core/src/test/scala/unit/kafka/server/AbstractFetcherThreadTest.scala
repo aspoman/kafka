@@ -19,17 +19,28 @@ package kafka.server
 
 import com.yammer.metrics.Metrics
 import kafka.cluster.BrokerEndPoint
+<<<<<<< HEAD
 import kafka.server.AbstractFetcherThread.{FetchRequest, PartitionData}
 import kafka.utils.TestUtils
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.protocol.Errors
 import org.apache.kafka.common.record.{CompressionType, MemoryRecords, SimpleRecord}
 import org.apache.kafka.common.requests.EpochEndOffset
+=======
+import kafka.common.TopicAndPartition
+import kafka.message.ByteBufferMessageSet
+import kafka.server.AbstractFetcherThread.{FetchRequest, PartitionData}
+import kafka.utils.TestUtils
+import org.apache.kafka.common.protocol.Errors
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.junit.Assert.{assertFalse, assertTrue}
 import org.junit.{Before, Test}
 
 import scala.collection.JavaConverters._
+<<<<<<< HEAD
 import scala.collection.{Map, Set, mutable}
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 class AbstractFetcherThreadTest {
 
@@ -41,7 +52,11 @@ class AbstractFetcherThreadTest {
 
   @Test
   def testMetricsRemovedOnShutdown() {
+<<<<<<< HEAD
     val partition = new TopicPartition("topic", 0)
+=======
+    val partition = new TopicAndPartition("topic", 0)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     val fetcherThread = new DummyFetcherThread("dummy", "client", new BrokerEndPoint(0, "localhost", 9092))
 
     fetcherThread.start()
@@ -62,7 +77,11 @@ class AbstractFetcherThreadTest {
 
   @Test
   def testConsumerLagRemovedWithPartition() {
+<<<<<<< HEAD
     val partition = new TopicPartition("topic", 0)
+=======
+    val partition = new TopicAndPartition("topic", 0)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     val fetcherThread = new DummyFetcherThread("dummy", "client", new BrokerEndPoint(0, "localhost", 9092))
 
     fetcherThread.start()
@@ -85,6 +104,7 @@ class AbstractFetcherThreadTest {
 
   private def allMetricsNames = Metrics.defaultRegistry().allMetrics().asScala.keySet.map(_.getName)
 
+<<<<<<< HEAD
   class DummyFetchRequest(val offsets: collection.Map[TopicPartition, Long]) extends FetchRequest {
     override def isEmpty: Boolean = offsets.isEmpty
 
@@ -95,6 +115,18 @@ class AbstractFetcherThreadTest {
     override def error: Errors = Errors.NONE
 
     override def toRecords: MemoryRecords = records
+=======
+  class DummyFetchRequest(val offsets: collection.Map[TopicAndPartition, Long]) extends FetchRequest {
+    override def isEmpty: Boolean = offsets.isEmpty
+
+    override def offset(topicAndPartition: TopicAndPartition): Long = offsets(topicAndPartition)
+  }
+
+  class DummyPartitionData extends PartitionData {
+    override def errorCode: Short = Errors.NONE.code
+
+    override def toByteBufferMessageSet: ByteBufferMessageSet = new ByteBufferMessageSet()
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     override def highWatermark: Long = 0L
 
@@ -103,13 +135,19 @@ class AbstractFetcherThreadTest {
 
   class DummyFetcherThread(name: String,
                            clientId: String,
+<<<<<<< HEAD
                            sourceBroker: BrokerEndPoint,
                            fetchBackOffMs: Int = 0)
     extends AbstractFetcherThread(name, clientId, sourceBroker, fetchBackOffMs, isInterruptible = true, includeLogTruncation = false) {
+=======
+                           sourceBroker: BrokerEndPoint)
+    extends AbstractFetcherThread(name, clientId, sourceBroker, 0) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     type REQ = DummyFetchRequest
     type PD = PartitionData
 
+<<<<<<< HEAD
     override def processPartitionData(topicPartition: TopicPartition,
                                       fetchOffset: Long,
                                       partitionData: PartitionData): Unit = {}
@@ -213,6 +251,23 @@ class AbstractFetcherThreadTest {
 
     override def handlePartitionsWithErrors(partitions: Iterable[TopicPartition]) = delayPartitions(partitions, fetchBackOffMs.toLong)
 
+=======
+    override def processPartitionData(topicAndPartition: TopicAndPartition,
+                                      fetchOffset: Long,
+                                      partitionData: PartitionData): Unit = {}
+
+    override def handleOffsetOutOfRange(topicAndPartition: TopicAndPartition): Long = 0L
+
+    override def handlePartitionsWithErrors(partitions: Iterable[TopicAndPartition]): Unit = {}
+
+    override protected def fetch(fetchRequest: DummyFetchRequest): collection.Map[TopicAndPartition, DummyPartitionData] = {
+      fetchRequest.offsets.mapValues(_ => new DummyPartitionData)
+    }
+
+    override protected def buildFetchRequest(partitionMap: collection.Map[TopicAndPartition, PartitionFetchState]): DummyFetchRequest = {
+      new DummyFetchRequest(partitionMap.mapValues(_.offset))
+    }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 
 }

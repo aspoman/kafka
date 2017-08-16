@@ -16,12 +16,21 @@
  */
 package org.apache.kafka.streams.processor.internals;
 
+<<<<<<< HEAD
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.MockConsumer;
+=======
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.clients.consumer.internals.PartitionAssignor;
-import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.Cluster;
 import org.apache.kafka.common.Node;
@@ -38,9 +47,13 @@ import org.apache.kafka.streams.kstream.internals.InternalStreamsBuilder;
 import org.apache.kafka.streams.kstream.internals.InternalStreamsBuilderTest;
 import org.apache.kafka.streams.processor.StateRestoreListener;
 import org.apache.kafka.streams.processor.TaskId;
+<<<<<<< HEAD
 import org.apache.kafka.streams.processor.internals.assignment.AssignmentInfo;
 import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.streams.state.Stores;
+=======
+import org.apache.kafka.streams.processor.TopologyBuilder;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.test.MockClientSupplier;
 import org.apache.kafka.test.MockProcessorSupplier;
 import org.apache.kafka.test.MockStateRestoreListener;
@@ -219,6 +232,7 @@ public class StreamThreadTest {
             suspended = false;
         }
 
+<<<<<<< HEAD
         @Override
         void suspend(final boolean clean) {
             if (suspended || closed) {
@@ -253,11 +267,14 @@ public class StreamThreadTest {
         }
     }
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     @SuppressWarnings("unchecked")
     @Test
     public void testPartitionAssignmentChangeForSingleGroup() throws Exception {
         internalTopologyBuilder.addSource(null, "source1", null, null, null, "topic1");
 
+<<<<<<< HEAD
         final StreamThread thread = getStreamThread();
 
         final Map<TaskId, Set<TopicPartition>> activeTasks = new HashMap<>();
@@ -265,6 +282,19 @@ public class StreamThreadTest {
             @Override
             public Map<TaskId, Set<TopicPartition>> activeTasks() {
                 return activeTasks;
+=======
+        TopologyBuilder builder = new TopologyBuilder();
+        builder.addSource("source1", "topic1");
+        builder.addSource("source2", "topic2");
+        builder.addSource("source3", "topic3");
+        builder.addProcessor("processor", new MockProcessorSupplier(), "source2", "source3");
+
+        StreamThread thread = new StreamThread(builder, config, new MockClientSupplier(), applicationId, clientId, processId, new Metrics(), new SystemTime()) {
+            @Override
+            protected StreamTask createStreamTask(TaskId id, Collection<TopicPartition> partitionsForTask) {
+                ProcessorTopology topology = builder.build("X", id.topicGroupId);
+                return new TestStreamTask(id, applicationId, partitionsForTask, topology, consumer, producer, restoreConsumer, config);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             }
         });
 
@@ -443,6 +473,7 @@ public class StreamThreadTest {
 
     @SuppressWarnings("unchecked")
     @Test
+<<<<<<< HEAD
     public void testStateChangeStartClose() throws InterruptedException {
 
         final StreamThread thread = createStreamThread(clientId, config, false);
@@ -462,6 +493,111 @@ public class StreamThreadTest {
             @Override
             public boolean conditionMet() {
                 return thread.state() == StreamThread.State.DEAD;
+=======
+    public void testMaybeClean() throws Exception {
+        File baseDir = Files.createTempDirectory("test").toFile();
+        try {
+            final long cleanupDelay = 1000L;
+            Properties props = configProps();
+            props.setProperty(StreamsConfig.STATE_CLEANUP_DELAY_MS_CONFIG, Long.toString(cleanupDelay));
+            props.setProperty(StreamsConfig.STATE_DIR_CONFIG, baseDir.getCanonicalPath());
+
+            StreamsConfig config = new StreamsConfig(props);
+
+            File applicationDir = new File(baseDir, applicationId);
+            applicationDir.mkdir();
+            File stateDir1 = new File(applicationDir, task1.toString());
+            File stateDir2 = new File(applicationDir, task2.toString());
+            File stateDir3 = new File(applicationDir, task3.toString());
+            File extraDir = new File(applicationDir, "X");
+            stateDir1.mkdir();
+            stateDir2.mkdir();
+            stateDir3.mkdir();
+            extraDir.mkdir();
+
+            MockTime mockTime = new MockTime();
+
+            TopologyBuilder builder = new TopologyBuilder();
+            builder.addSource("source1", "topic1");
+
+            StreamThread thread = new StreamThread(builder, config, new MockClientSupplier(), applicationId, clientId,  processId, new Metrics(), mockTime) {
+                @Override
+                public void maybeClean() {
+                    super.maybeClean();
+                }
+
+                @Override
+                protected StreamTask createStreamTask(TaskId id, Collection<TopicPartition> partitionsForTask) {
+                    ProcessorTopology topology = builder.build("X", id.topicGroupId);
+                    return new TestStreamTask(id, applicationId, partitionsForTask, topology, consumer, producer, restoreConsumer, config);
+                }
+            };
+
+            initPartitionGrouper(config, thread);
+
+            ConsumerRebalanceListener rebalanceListener = thread.rebalanceListener;
+
+            assertTrue(thread.tasks().isEmpty());
+            mockTime.sleep(cleanupDelay);
+
+            // all directories exist since an assignment didn't happen
+            assertTrue(stateDir1.exists());
+            assertTrue(stateDir2.exists());
+            assertTrue(stateDir3.exists());
+            assertTrue(extraDir.exists());
+
+            List<TopicPartition> revokedPartitions;
+            List<TopicPartition> assignedPartitions;
+            Map<Integer, StreamTask> prevTasks;
+
+            //
+            // Assign t1p1 and t1p2. This should create task1 & task2
+            //
+            revokedPartitions = Collections.emptyList();
+            assignedPartitions = Arrays.asList(t1p1, t1p2);
+            prevTasks = new HashMap(thread.tasks());
+
+            rebalanceListener.onPartitionsRevoked(revokedPartitions);
+            rebalanceListener.onPartitionsAssigned(assignedPartitions);
+
+            // there shouldn't be any previous task
+            assertTrue(prevTasks.isEmpty());
+
+            // task 1 & 2 are created
+            assertEquals(2, thread.tasks().size());
+
+            // all directories should still exit before the cleanup delay time
+            mockTime.sleep(cleanupDelay - 10L);
+            thread.maybeClean();
+            assertTrue(stateDir1.exists());
+            assertTrue(stateDir2.exists());
+            assertTrue(stateDir3.exists());
+            assertTrue(extraDir.exists());
+
+            // all state directories except for task task2 & task3 will be removed. the extra directory should still exists
+            mockTime.sleep(11L);
+            thread.maybeClean();
+            assertTrue(stateDir1.exists());
+            assertTrue(stateDir2.exists());
+            assertFalse(stateDir3.exists());
+            assertTrue(extraDir.exists());
+
+            //
+            // Revoke t1p1 and t1p2. This should remove task1 & task2
+            //
+            revokedPartitions = assignedPartitions;
+            assignedPartitions = Collections.emptyList();
+            prevTasks = new HashMap(thread.tasks());
+
+            rebalanceListener.onPartitionsRevoked(revokedPartitions);
+            rebalanceListener.onPartitionsAssigned(assignedPartitions);
+
+            // previous tasks should be committed
+            assertEquals(2, prevTasks.size());
+            for (StreamTask task : prevTasks.values()) {
+                assertTrue(((TestStreamTask) task).committed);
+                ((TestStreamTask) task).committed = false;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             }
         }, 10 * 1000, "Thread never shut down.");
         thread.close();
@@ -504,10 +640,15 @@ public class StreamThreadTest {
 
         //clientSupplier.consumer.assign(Arrays.asList(new TopicPartition(TOPIC, 0), new TopicPartition(TOPIC, 1)));
 
+<<<<<<< HEAD
         final StreamThread thread1 = createStreamThread(clientId + 1, config, false);
         final StreamThread thread2 = createStreamThread(clientId + 2, config, false);
+=======
+            MockTime mockTime = new MockTime();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
+<<<<<<< HEAD
         final Map<TaskId, Set<TopicPartition>> task0 = Collections.singletonMap(new TaskId(0, 0), task0Assignment);
         final Map<TaskId, Set<TopicPartition>> task1 = Collections.singletonMap(new TaskId(0, 1), task1Assignment);
 
@@ -716,6 +857,18 @@ public class StreamThreadTest {
                 TaskManager.TaskAction action = (TaskManager.TaskAction) currentArguments[0];
                 if (!action.name().equals("commit")) {
                     throw new IllegalArgumentException("expected to get commit action but was:" + action.name());
+=======
+            StreamThread thread = new StreamThread(builder, config, new MockClientSupplier(), applicationId, clientId,  processId, new Metrics(), mockTime) {
+                @Override
+                public void maybeCommit() {
+                    super.maybeCommit();
+                }
+
+                @Override
+                protected StreamTask createStreamTask(TaskId id, Collection<TopicPartition> partitionsForTask) {
+                    ProcessorTopology topology = builder.build("X", id.topicGroupId);
+                    return new TestStreamTask(id, applicationId, partitionsForTask, topology, consumer, producer, restoreConsumer, config);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 }
                 return null;
             }
@@ -1026,6 +1179,7 @@ public class StreamThreadTest {
     }
 
     @Test
+<<<<<<< HEAD
     @SuppressWarnings("unchecked")
     public void shouldAlwaysUpdateWithLatestTopicsFromStreamPartitionAssignor() throws Exception {
         internalTopologyBuilder.addSource(null, "source", null, null, null, Pattern.compile("t.*"));
@@ -1059,6 +1213,20 @@ public class StreamThreadTest {
         final TaskId taskId3 = new TaskId(0, 0);
 
         List<TaskId> activeTasks = Utils.mkList(taskId1);
+=======
+    public void testInjectClients() {
+        TopologyBuilder builder = new TopologyBuilder();
+        StreamsConfig config = new StreamsConfig(configProps());
+        MockClientSupplier clientSupplier = new MockClientSupplier();
+        StreamThread thread = new StreamThread(builder, config, clientSupplier, applicationId,
+                                               clientId,  processId, new Metrics(), new MockTime());
+        assertSame(clientSupplier.producer, thread.producer);
+        assertSame(clientSupplier.consumer, thread.consumer);
+        assertSame(clientSupplier.restoreConsumer, thread.restoreConsumer);
+    }
+
+    private void initPartitionGrouper(StreamsConfig config, StreamThread thread) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         final Map<TaskId, Set<TopicPartition>> standbyTasks = new HashMap<>();
 

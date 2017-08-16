@@ -63,7 +63,90 @@ public interface Record {
      * Check whether the record has a valid checksum.
      * @return true if the record has a valid checksum, false otherwise
      */
+<<<<<<< HEAD
     boolean isValid();
+=======
+    public Record(long timestamp, byte[] key, byte[] value, CompressionType type, int valueOffset, int valueSize) {
+        this(ByteBuffer.allocate(recordSize(key == null ? 0 : key.length,
+            value == null ? 0 : valueSize >= 0 ? valueSize : value.length - valueOffset)));
+        write(this.buffer, timestamp, key, value, type, valueOffset, valueSize);
+        this.buffer.rewind();
+    }
+
+    public Record(long timestamp, byte[] key, byte[] value, CompressionType type) {
+        this(timestamp, key, value, type, 0, -1);
+    }
+
+    public Record(long timestamp, byte[] value, CompressionType type) {
+        this(timestamp, null, value, type);
+    }
+
+    public Record(long timestamp, byte[] key, byte[] value) {
+        this(timestamp, key, value, CompressionType.NONE);
+    }
+
+    public Record(long timestamp, byte[] value) {
+        this(timestamp, null, value, CompressionType.NONE);
+    }
+
+    // Write a record to the buffer, if the record's compression type is none, then
+    // its value payload should be already compressed with the specified type
+    public static void write(ByteBuffer buffer, long timestamp, byte[] key, byte[] value, CompressionType type, int valueOffset, int valueSize) {
+        // construct the compressor with compression type none since this function will not do any
+        //compression according to the input type, it will just write the record's payload as is
+        Compressor compressor = new Compressor(buffer, CompressionType.NONE);
+        try {
+            compressor.putRecord(timestamp, key, value, type, valueOffset, valueSize);
+        } finally {
+            compressor.close();
+        }
+    }
+
+    public static void write(Compressor compressor, long crc, byte attributes, long timestamp, byte[] key, byte[] value, int valueOffset, int valueSize) {
+        // write crc
+        compressor.putInt((int) (crc & 0xffffffffL));
+        // write magic value
+        compressor.putByte(CURRENT_MAGIC_VALUE);
+        // write attributes
+        compressor.putByte(attributes);
+        // write timestamp
+        compressor.putLong(timestamp);
+        // write the key
+        if (key == null) {
+            compressor.putInt(-1);
+        } else {
+            compressor.putInt(key.length);
+            compressor.put(key, 0, key.length);
+        }
+        // write the value
+        if (value == null) {
+            compressor.putInt(-1);
+        } else {
+            int size = valueSize >= 0 ? valueSize : (value.length - valueOffset);
+            compressor.putInt(size);
+            compressor.put(value, valueOffset, size);
+        }
+    }
+
+    public static int recordSize(byte[] key, byte[] value) {
+        return recordSize(key == null ? 0 : key.length, value == null ? 0 : value.length);
+    }
+
+    public static int recordSize(int keySize, int valueSize) {
+        return CRC_LENGTH + MAGIC_LENGTH + ATTRIBUTE_LENGTH + TIMESTAMP_LENGTH + KEY_SIZE_LENGTH + keySize + VALUE_SIZE_LENGTH + valueSize;
+    }
+
+    public ByteBuffer buffer() {
+        return this.buffer;
+    }
+
+    public static byte computeAttributes(CompressionType type) {
+        byte attributes = 0;
+        if (type.id > 0)
+            attributes = (byte) (attributes | (COMPRESSION_CODEC_MASK & type.id));
+        return attributes;
+    }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     /**
      * Raise a {@link org.apache.kafka.common.errors.CorruptRecordException} if the record does not have a valid checksum.

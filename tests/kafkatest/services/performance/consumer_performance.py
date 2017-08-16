@@ -18,7 +18,11 @@ import os
 
 from kafkatest.services.performance import PerformanceService
 from kafkatest.services.security.security_config import SecurityConfig
+<<<<<<< HEAD
 from kafkatest.version import DEV_BRANCH, V_0_9_0_0, LATEST_0_10_0
+=======
+from kafkatest.version import TRUNK, V_0_9_0_0
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 class ConsumerPerformanceService(PerformanceService):
@@ -136,7 +140,11 @@ class ConsumerPerformanceService(PerformanceService):
         cmd += " export KAFKA_OPTS=%s;" % self.security_config.kafka_opts
         cmd += " export KAFKA_LOG4J_OPTS=\"-Dlog4j.configuration=file:%s\";" % ConsumerPerformanceService.LOG4J_CONFIG
         cmd += " %s" % self.path.script("kafka-consumer-perf-test.sh", node)
+<<<<<<< HEAD
         for key, value in self.args(node.version).items():
+=======
+        for key, value in self.args.items():
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             cmd += " --%s %s" % (key, value)
 
         if node.version >= V_0_9_0_0:

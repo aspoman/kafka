@@ -362,7 +362,11 @@ public class KafkaConfigBackingStoreTest {
                 new ConsumerRecord<>(TOPIC, 0, 2, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TASK_CONFIG_KEYS.get(1), CONFIGS_SERIALIZED.get(2)),
                 new ConsumerRecord<>(TOPIC, 0, 3, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TARGET_STATE_KEYS.get(0), CONFIGS_SERIALIZED.get(3)),
                 new ConsumerRecord<>(TOPIC, 0, 4, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, COMMIT_TASKS_CONFIG_KEYS.get(0), CONFIGS_SERIALIZED.get(4)));
+<<<<<<< HEAD
         LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap<>();
+=======
+        LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         deserialized.put(CONFIGS_SERIALIZED.get(0), CONNECTOR_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(1), TASK_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(2), TASK_CONFIG_STRUCTS.get(0));
@@ -378,7 +382,11 @@ public class KafkaConfigBackingStoreTest {
 
         PowerMock.replayAll();
 
+<<<<<<< HEAD
         configStorage.setupAndCreateKafkaBasedLog(TOPIC, DEFAULT_DISTRIBUTED_CONFIG);
+=======
+        configStorage.configure(DEFAULT_DISTRIBUTED_CONFIG);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         configStorage.start();
 
         // Should see a single connector with initial state paused
@@ -402,7 +410,11 @@ public class KafkaConfigBackingStoreTest {
                 new ConsumerRecord<>(TOPIC, 0, 1, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TASK_CONFIG_KEYS.get(0), CONFIGS_SERIALIZED.get(1)),
                 new ConsumerRecord<>(TOPIC, 0, 2, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TASK_CONFIG_KEYS.get(1), CONFIGS_SERIALIZED.get(2)),
                 new ConsumerRecord<>(TOPIC, 0, 3, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, COMMIT_TASKS_CONFIG_KEYS.get(0), CONFIGS_SERIALIZED.get(3)));
+<<<<<<< HEAD
         LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap<>();
+=======
+        LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         deserialized.put(CONFIGS_SERIALIZED.get(0), CONNECTOR_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(1), TASK_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(2), TASK_CONFIG_STRUCTS.get(0));
@@ -420,7 +432,11 @@ public class KafkaConfigBackingStoreTest {
 
         PowerMock.replayAll();
 
+<<<<<<< HEAD
         configStorage.setupAndCreateKafkaBasedLog(TOPIC, DEFAULT_DISTRIBUTED_CONFIG);
+=======
+        configStorage.configure(DEFAULT_DISTRIBUTED_CONFIG);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         configStorage.start();
 
         // Should see a single connector with initial state paused
@@ -444,7 +460,11 @@ public class KafkaConfigBackingStoreTest {
                 new ConsumerRecord<>(TOPIC, 0, 1, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TASK_CONFIG_KEYS.get(0), CONFIGS_SERIALIZED.get(1)),
                 new ConsumerRecord<>(TOPIC, 0, 2, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TASK_CONFIG_KEYS.get(1), CONFIGS_SERIALIZED.get(2)),
                 new ConsumerRecord<>(TOPIC, 0, 3, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, COMMIT_TASKS_CONFIG_KEYS.get(0), CONFIGS_SERIALIZED.get(3)));
+<<<<<<< HEAD
         LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap<>();
+=======
+        LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         deserialized.put(CONFIGS_SERIALIZED.get(0), CONNECTOR_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(1), TASK_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(2), TASK_CONFIG_STRUCTS.get(0));
@@ -470,7 +490,11 @@ public class KafkaConfigBackingStoreTest {
 
         PowerMock.replayAll();
 
+<<<<<<< HEAD
         configStorage.setupAndCreateKafkaBasedLog(TOPIC, DEFAULT_DISTRIBUTED_CONFIG);
+=======
+        configStorage.configure(DEFAULT_DISTRIBUTED_CONFIG);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         configStorage.start();
 
         // Should see a single connector with initial state paused
@@ -493,7 +517,11 @@ public class KafkaConfigBackingStoreTest {
                 new ConsumerRecord<>(TOPIC, 0, 2, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TASK_CONFIG_KEYS.get(1), CONFIGS_SERIALIZED.get(2)),
                 new ConsumerRecord<>(TOPIC, 0, 3, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TARGET_STATE_KEYS.get(0), CONFIGS_SERIALIZED.get(3)),
                 new ConsumerRecord<>(TOPIC, 0, 4, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, COMMIT_TASKS_CONFIG_KEYS.get(0), CONFIGS_SERIALIZED.get(4)));
+<<<<<<< HEAD
         LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap<>();
+=======
+        LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         deserialized.put(CONFIGS_SERIALIZED.get(0), CONNECTOR_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(1), TASK_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(2), TASK_CONFIG_STRUCTS.get(0));
@@ -509,7 +537,11 @@ public class KafkaConfigBackingStoreTest {
 
         PowerMock.replayAll();
 
+<<<<<<< HEAD
         configStorage.setupAndCreateKafkaBasedLog(TOPIC, DEFAULT_DISTRIBUTED_CONFIG);
+=======
+        configStorage.configure(DEFAULT_DISTRIBUTED_CONFIG);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         configStorage.start();
 
         // The target state deletion should reset the state to STARTED
@@ -593,7 +625,11 @@ public class KafkaConfigBackingStoreTest {
                 new ConsumerRecord<>(TOPIC, 0, 4, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, TARGET_STATE_KEYS.get(0), CONFIGS_SERIALIZED.get(4)),
                 new ConsumerRecord<>(TOPIC, 0, 5, 0L, TimestampType.CREATE_TIME, 0L, 0, 0, COMMIT_TASKS_CONFIG_KEYS.get(0), CONFIGS_SERIALIZED.get(5)));
 
+<<<<<<< HEAD
         LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap<>();
+=======
+        LinkedHashMap<byte[], Struct> deserialized = new LinkedHashMap();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         deserialized.put(CONFIGS_SERIALIZED.get(0), CONNECTOR_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(1), TASK_CONFIG_STRUCTS.get(0));
         deserialized.put(CONFIGS_SERIALIZED.get(2), TASK_CONFIG_STRUCTS.get(0));
@@ -610,7 +646,11 @@ public class KafkaConfigBackingStoreTest {
 
         PowerMock.replayAll();
 
+<<<<<<< HEAD
         configStorage.setupAndCreateKafkaBasedLog(TOPIC, DEFAULT_DISTRIBUTED_CONFIG);
+=======
+        configStorage.configure(DEFAULT_DISTRIBUTED_CONFIG);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         configStorage.start();
 
         // Should see a single connector and its config should be the last one seen anywhere in the log

@@ -15,7 +15,10 @@
 
 
 from ducktape.mark import parametrize
+<<<<<<< HEAD
 from ducktape.mark.resource import cluster
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 from ducktape.tests.test import Test
 from ducktape.utils.util import wait_until
 
@@ -23,7 +26,11 @@ from kafkatest.services.kafka import KafkaService
 from kafkatest.services.verifiable_producer import VerifiableProducer
 from kafkatest.services.zookeeper import ZookeeperService
 from kafkatest.utils import is_version
+<<<<<<< HEAD
 from kafkatest.version import LATEST_0_8_2, LATEST_0_9, LATEST_0_10_0, LATEST_0_10_1, DEV_BRANCH, KafkaVersion
+=======
+from kafkatest.version import LATEST_0_8_2, LATEST_0_9, TRUNK, KafkaVersion
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 class TestVerifiableProducer(Test):

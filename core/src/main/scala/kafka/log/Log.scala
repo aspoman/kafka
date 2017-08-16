@@ -902,6 +902,7 @@ class Log(@volatile var dir: File,
    * @param startOffset The offset to begin reading at
    * @param maxLength The maximum number of bytes to read
    * @param maxOffset The offset to read up to, exclusive. (i.e. this offset NOT included in the resulting message set)
+<<<<<<< HEAD
    * @param minOneMessage If this is true, the first message will be returned even if it exceeds `maxLength` (if one exists)
    * @param isolationLevel The isolation level of the fetcher. The READ_UNCOMMITTED isolation level has the traditional
    *                       read semantics (e.g. consumers are limited to fetching up to the high watermark). In
@@ -952,6 +953,41 @@ class Log(@volatile var dir: File,
             val exposedPos = nextOffsetMetadata.relativePositionInSegment.toLong
             // Check the segment again in case a new segment has just rolled out.
             if (segmentEntry != segments.lastEntry)
+=======
+   *
+   * @throws OffsetOutOfRangeException If startOffset is beyond the log end offset or before the base offset of the first segment.
+   * @return The fetch data information including fetch starting offset metadata and messages read.
+   */
+  def read(startOffset: Long, maxLength: Int, maxOffset: Option[Long] = None): FetchDataInfo = {
+    trace("Reading %d bytes from offset %d in log %s of length %d bytes".format(maxLength, startOffset, name, size))
+
+    // Because we don't use lock for reading, the synchronization is a little bit tricky.
+    // We create the local variables to avoid race conditions with updates to the log.
+    val currentNextOffsetMetadata = nextOffsetMetadata
+    val next = currentNextOffsetMetadata.messageOffset
+    if(startOffset == next)
+      return FetchDataInfo(currentNextOffsetMetadata, MessageSet.Empty)
+
+    var entry = segments.floorEntry(startOffset)
+
+    // attempt to read beyond the log end offset is an error
+    if(startOffset > next || entry == null)
+      throw new OffsetOutOfRangeException("Request for offset %d but we only have log segments in the range %d to %d.".format(startOffset, segments.firstKey, next))
+
+    // Do the read on the segment with a base offset less than the target offset
+    // but if that segment doesn't contain any messages with an offset greater than that
+    // continue to read from successive segments until we get some messages or we reach the end of the log
+    while(entry != null) {
+      // If the fetch occurs on the active segment, there might be a race condition where two fetch requests occur after
+      // the message is appended but before the nextOffsetMetadata is updated. In that case the second fetch may
+      // cause OffsetOutOfRangeException. To solve that, we cap the reading up to exposed position instead of the log
+      // end of the active segment.
+      val maxPosition = {
+        if (entry == segments.lastEntry) {
+          val exposedPos = nextOffsetMetadata.relativePositionInSegment.toLong
+          // Check the segment again in case a new segment has just rolled out.
+          if (entry != segments.lastEntry)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             // New log segment has rolled out, we can read up to the file end.
               segment.size
             else
@@ -1091,6 +1127,7 @@ class Log(@volatile var dir: File,
    *                  (if there is one) and returns true iff it is deletable
    * @return The number of segments deleted
    */
+<<<<<<< HEAD
   private def deleteOldSegments(predicate: (LogSegment, Option[LogSegment]) => Boolean, reason: String): Int = {
     lock synchronized {
       val deletable = deletableSegments(predicate)
@@ -1102,6 +1139,16 @@ class Log(@volatile var dir: File,
 
   private def deleteSegments(deletable: Iterable[LogSegment]): Int = {
     maybeHandleIOException(s"Error while deleting segments for $topicPartition in dir ${dir.getParent}") {
+=======
+  def deleteOldSegments(predicate: LogSegment => Boolean): Int = {
+    lock synchronized {
+      //find any segments that match the user-supplied predicate UNLESS it is the final segment
+      //and it is empty (since we would just end up re-creating it)
+      val lastEntry = segments.lastEntry
+      val deletable =
+        if (lastEntry == null) Seq.empty
+        else logSegments.takeWhile(s => predicate(s) && (s.baseOffset != lastEntry.getValue.baseOffset || s.size > 0))
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
       val numToDelete = deletable.size
       if (numToDelete > 0) {
         // we must always have at least one segment, so if we are going to delete all the segments, create a new one first

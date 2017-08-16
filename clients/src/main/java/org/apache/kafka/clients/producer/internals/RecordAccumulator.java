@@ -569,11 +569,16 @@ public final class RecordAccumulator {
      */
     public void awaitFlushCompletion() throws InterruptedException {
         try {
+<<<<<<< HEAD
             for (ProducerBatch batch : this.incomplete.copyAll())
+=======
+            for (RecordBatch batch : this.incomplete.all())
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 batch.produceFuture.await();
         } finally {
             this.flushesInProgress.decrementAndGet();
         }
+<<<<<<< HEAD
     }
 
     /**
@@ -581,6 +586,8 @@ public final class RecordAccumulator {
      */
     public boolean hasIncomplete() {
         return !this.incomplete.isEmpty();
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /**

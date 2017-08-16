@@ -251,12 +251,20 @@ public class StandaloneHerder extends AbstractHerder {
 
         ConnectorConfig connConfig;
         if (worker.isSinkConnector(connName)) {
+<<<<<<< HEAD
             connConfig = new SinkConnectorConfig(plugins(), config);
+=======
+            connConfig = new SinkConnectorConfig(config);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             return worker.connectorTaskConfigs(connName,
                                                connConfig.getInt(ConnectorConfig.TASKS_MAX_CONFIG),
                                                connConfig.getList(SinkConnectorConfig.TOPICS_CONFIG));
         } else {
+<<<<<<< HEAD
             connConfig = new SourceConnectorConfig(plugins(), config);
+=======
+            connConfig = new SourceConnectorConfig(config);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             return worker.connectorTaskConfigs(connName,
                                                connConfig.getInt(ConnectorConfig.TASKS_MAX_CONFIG),
                                                null);

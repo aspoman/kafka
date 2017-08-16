@@ -17,11 +17,19 @@ import itertools
 import os
 
 from ducktape.services.background_thread import BackgroundThreadService
+<<<<<<< HEAD
 from ducktape.cluster.remoteaccount import RemoteCommandError
 
 from kafkatest.directory_layout.kafka_path import KafkaPathResolverMixin
 from kafkatest.services.monitor.jmx import JmxMixin
 from kafkatest.version import DEV_BRANCH, LATEST_0_8_2, LATEST_0_9, LATEST_0_10_0, V_0_10_0_0, V_0_11_0_0
+=======
+from ducktape.utils.util import wait_until
+
+from kafkatest.directory_layout.kafka_path import KafkaPathResolverMixin
+from kafkatest.services.monitor.jmx import JmxMixin
+from kafkatest.version import TRUNK, LATEST_0_8_2, LATEST_0_9, V_0_10_0_0
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 """
 0.8.2.1 ConsoleConsumer options
@@ -94,11 +102,18 @@ class ConsoleConsumer(KafkaPathResolverMixin, JmxMixin, BackgroundThreadService)
             "collect_default": False}
     }
 
+<<<<<<< HEAD
     def __init__(self, context, num_nodes, kafka, topic, group_id="test-consumer-group", new_consumer=True,
                  message_validator=None, from_beginning=True, consumer_timeout_ms=None, version=DEV_BRANCH,
                  client_id="console-consumer", print_key=False, jmx_object_names=None, jmx_attributes=None,
                  enable_systest_events=False, stop_timeout_sec=15, print_timestamp=False,
                  isolation_level="read_uncommitted"):
+=======
+    def __init__(self, context, num_nodes, kafka, topic, group_id="test-consumer-group", new_consumer=False,
+                 message_validator=None, from_beginning=True, consumer_timeout_ms=None, version=TRUNK,
+                 client_id="console-consumer", print_key=False, jmx_object_names=None, jmx_attributes=[],
+                 enable_systest_events=False, stop_timeout_sec=15):
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         """
         Args:
             context:                    standard context
@@ -112,13 +127,20 @@ class ConsoleConsumer(KafkaPathResolverMixin, JmxMixin, BackgroundThreadService)
                                         successively consumed messages exceeds this timeout. Setting this and
                                         waiting for the consumer to stop is a pretty good way to consume all messages
                                         in a topic.
+<<<<<<< HEAD
             print_key                   if True, print each message's key as well
+=======
+            print_key                   if True, print each message's key in addition to its value
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             enable_systest_events       if True, console consumer will print additional lifecycle-related information
                                         only available in 0.10.0 and later.
             stop_timeout_sec            After stopping a node, wait up to stop_timeout_sec for the node to stop,
                                         and the corresponding background thread to finish successfully.
+<<<<<<< HEAD
             print_timestamp             if True, print each message's timestamp as well
             isolation_level             How to handle transactional messages.
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         """
         JmxMixin.__init__(self, num_nodes, jmx_object_names, jmx_attributes or [])
         BackgroundThreadService.__init__(self, context, num_nodes)
@@ -142,13 +164,19 @@ class ConsoleConsumer(KafkaPathResolverMixin, JmxMixin, BackgroundThreadService)
         self.log_level = "TRACE"
         self.stop_timeout_sec = stop_timeout_sec
 
+<<<<<<< HEAD
         self.isolation_level = isolation_level
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         self.enable_systest_events = enable_systest_events
         if self.enable_systest_events:
             # Only available in 0.10.0 and up
             assert version >= V_0_10_0_0
+<<<<<<< HEAD
 
         self.print_timestamp = print_timestamp
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     def prop_file(self, node):
         """Return a string which can be used to create a configuration file appropriate for the given node."""
@@ -261,6 +289,7 @@ class ConsoleConsumer(KafkaPathResolverMixin, JmxMixin, BackgroundThreadService)
             self.logger.debug("collecting following jmx objects: %s", self.jmx_object_names)
             self.start_jmx_tool(idx, node)
 
+<<<<<<< HEAD
         for line in consumer_output:
             msg = line.strip()
             if msg == "shutdown_complete":
@@ -275,6 +304,22 @@ class ConsoleConsumer(KafkaPathResolverMixin, JmxMixin, BackgroundThreadService)
                     self.messages_consumed[idx].append(msg)
 
         with self.lock:
+=======
+            for line in itertools.chain([first_line], consumer_output):
+                msg = line.strip()
+
+                if msg == "shutdown_complete":
+                    # Note that we can only rely on shutdown_complete message if running 0.10.0 or greater
+                    if node in self.clean_shutdown_nodes:
+                        raise Exception("Unexpected shutdown event from consumer, already shutdown. Consumer index: %d" % idx)
+                    self.clean_shutdown_nodes.add(node)
+                else:
+                    if self.message_validator is not None:
+                        msg = self.message_validator(msg)
+                    if msg is not None:
+                        self.messages_consumed[idx].append(msg)
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             self.read_jmx_output(idx, node)
 
     def start_node(self, node):

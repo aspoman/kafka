@@ -202,7 +202,11 @@ public class WorkerCoordinatorTest {
 
         final String consumerId = "leader";
 
+<<<<<<< HEAD
         client.prepareResponse(groupCoordinatorResponse(node, Errors.NONE));
+=======
+        client.prepareResponse(groupMetadataResponse(node, Errors.NONE.code()));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         coordinator.ensureCoordinatorReady();
 
         // normal join group
@@ -242,7 +246,11 @@ public class WorkerCoordinatorTest {
 
         final String memberId = "member";
 
+<<<<<<< HEAD
         client.prepareResponse(groupCoordinatorResponse(node, Errors.NONE));
+=======
+        client.prepareResponse(groupMetadataResponse(node, Errors.NONE.code()));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         coordinator.ensureCoordinatorReady();
 
         // normal join group
@@ -283,7 +291,11 @@ public class WorkerCoordinatorTest {
 
         final String memberId = "member";
 
+<<<<<<< HEAD
         client.prepareResponse(groupCoordinatorResponse(node, Errors.NONE));
+=======
+        client.prepareResponse(groupMetadataResponse(node, Errors.NONE.code()));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         coordinator.ensureCoordinatorReady();
 
         // config mismatch results in assignment error
@@ -314,7 +326,11 @@ public class WorkerCoordinatorTest {
 
         PowerMock.replayAll();
 
+<<<<<<< HEAD
         client.prepareResponse(groupCoordinatorResponse(node, Errors.NONE));
+=======
+        client.prepareResponse(groupMetadataResponse(node, Errors.NONE.code()));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         coordinator.ensureCoordinatorReady();
 
         // join the group once

@@ -39,13 +39,22 @@ class ControlledShutdownLeaderSelectorTest {
     val firstLeader = 1
 
     val zkUtils = EasyMock.mock(classOf[ZkUtils])
+<<<<<<< HEAD
     val controllerContext = new ControllerContext(zkUtils)
     controllerContext.liveBrokers = assignment.map(Broker(_, Seq.empty, None)).toSet
+=======
+    val controllerContext = new ControllerContext(zkUtils, zkSessionTimeout = 1000)
+    controllerContext.liveBrokers = assignment.map(Broker(_, Map.empty, None)).toSet
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     controllerContext.shuttingDownBrokerIds = mutable.Set(2, 3)
     controllerContext.partitionReplicaAssignment = mutable.Map(topicPartition -> assignment)
 
     val leaderSelector = new ControlledShutdownLeaderSelector(controllerContext)
+<<<<<<< HEAD
     val firstLeaderAndIsr = LeaderAndIsr(firstLeader, firstIsr)
+=======
+    val firstLeaderAndIsr = new LeaderAndIsr(firstLeader, firstIsr)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     val (secondLeaderAndIsr, secondReplicas) = leaderSelector.selectLeader(topicPartition, firstLeaderAndIsr)
 
     assertEquals(preferredReplicaId, secondLeaderAndIsr.leader)

@@ -30,7 +30,10 @@ import org.apache.kafka.connect.runtime.rest.entities.ConfigKeyInfo;
 import org.apache.kafka.connect.runtime.rest.entities.ConfigValueInfo;
 import org.apache.kafka.connect.runtime.rest.entities.ConnectorInfo;
 import org.apache.kafka.connect.runtime.rest.entities.ConnectorStateInfo;
+<<<<<<< HEAD
 import org.apache.kafka.connect.runtime.rest.errors.BadRequestException;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.connect.source.SourceConnector;
 import org.apache.kafka.connect.storage.ConfigBackingStore;
 import org.apache.kafka.connect.storage.StatusBackingStore;
@@ -228,6 +231,7 @@ public abstract class AbstractHerder implements Herder, TaskStatus.Listener, Con
     }
 
     @Override
+<<<<<<< HEAD
     public ConfigInfos validateConnectorConfig(Map<String, String> connectorProps) {
         String connType = connectorProps.get(ConnectorConfig.CONNECTOR_CLASS_CONFIG);
         if (connType == null)
@@ -262,6 +266,54 @@ public abstract class AbstractHerder implements Herder, TaskStatus.Listener, Con
             return generateResult(connType, configKeys, configValues, new ArrayList<>(allGroups));
         } finally {
             Plugins.compareAndSwapLoaders(savedLoader);
+=======
+    public ConfigInfos validateConfigs(String connType, Map<String, String> connectorConfig) {
+        Connector connector = getConnector(connType);
+        ConfigDef connectorConfigDef;
+        if (connector instanceof SourceConnector) {
+            connectorConfigDef = SourceConnectorConfig.configDef();
+        } else {
+            connectorConfigDef = SinkConnectorConfig.configDef();
+        }
+        List<ConfigValue> connectorConfigValues = connectorConfigDef.validate(connectorConfig);
+        
+        Config config = connector.validate(connectorConfig);
+        ConfigDef configDef = connector.config();
+        Map<String, ConfigKey> configKeys = configDef.configKeys();
+        List<ConfigValue> configValues = config.configValues();
+
+        Map<String, ConfigKey> resultConfigKeys = new HashMap<>(configKeys);
+        resultConfigKeys.putAll(connectorConfigDef.configKeys());
+        configValues.addAll(connectorConfigValues);
+
+        List<String> allGroups = new LinkedList<>(connectorConfigDef.groups());
+        List<String> groups = configDef.groups();
+        allGroups.addAll(groups);
+
+        return generateResult(connType, resultConfigKeys, configValues, allGroups);
+    }
+
+    public static List<ConnectorPluginInfo> connectorPlugins() {
+        synchronized (LOCK) {
+            if (validConnectorPlugins != null) {
+                return validConnectorPlugins;
+            }
+            ReflectionsUtil.registerUrlTypes();
+            ConfigurationBuilder builder = new ConfigurationBuilder().setUrls(ClasspathHelper.forJavaClassPath());
+            Reflections reflections = new Reflections(builder);
+
+            Set<Class<? extends Connector>> connectorClasses = reflections.getSubTypesOf(Connector.class);
+            connectorClasses.removeAll(EXCLUDES);
+            List<ConnectorPluginInfo> connectorPlugins = new LinkedList<>();
+            for (Class<? extends Connector> connectorClass : connectorClasses) {
+                int mod = connectorClass.getModifiers();
+                if (!Modifier.isAbstract(mod) && !Modifier.isInterface(mod)) {
+                    connectorPlugins.add(new ConnectorPluginInfo(connectorClass.getCanonicalName()));
+                }
+            }
+            validConnectorPlugins = connectorPlugins;
+            return connectorPlugins;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
     }
 

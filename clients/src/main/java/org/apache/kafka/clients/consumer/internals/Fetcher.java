@@ -188,6 +188,7 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
     }
 
     /**
+<<<<<<< HEAD
      * Set-up a fetch request for any node that we have assigned partitions for which doesn't already have
      * an in-flight fetch or pending fetch data.
      * @return number of fetches sent
@@ -201,6 +202,15 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
             log.debug("Sending {} fetch for partitions {} to broker {}", isolationLevel, request.fetchData().keySet(),
                     fetchTarget);
             client.send(fetchTarget, request)
+=======
+     * Set-up a fetch request for any node that we have assigned partitions for which doesn't have one.
+     *
+     */
+    public void sendFetches() {
+        for (Map.Entry<Node, FetchRequest> fetchEntry: createFetchRequests().entrySet()) {
+            final FetchRequest fetch = fetchEntry.getValue();
+            client.send(fetchEntry.getKey(), ApiKeys.FETCH, fetch)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                     .addListener(new RequestFutureListener<ClientResponse>() {
                         @Override
                         public void onSuccess(ClientResponse resp) {
@@ -769,10 +779,17 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
      * Create fetch requests for all nodes for which we have assigned partitions
      * that have no existing requests in flight.
      */
+<<<<<<< HEAD
     private Map<Node, FetchRequest.Builder> createFetchRequests() {
         // create the fetch info
         Cluster cluster = metadata.fetch();
         Map<Node, LinkedHashMap<TopicPartition, FetchRequest.PartitionData>> fetchable = new LinkedHashMap<>();
+=======
+    private Map<Node, FetchRequest> createFetchRequests() {
+        // create the fetch info
+        Cluster cluster = metadata.fetch();
+        Map<Node, Map<TopicPartition, FetchRequest.PartitionData>> fetchable = new HashMap<>();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         for (TopicPartition partition : fetchablePartitions()) {
             Node node = cluster.leaderFor(partition);
             if (node == null) {
@@ -832,6 +849,7 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
                     return null;
                 }
 
+<<<<<<< HEAD
                 log.trace("Preparing to read {} bytes of data for partition {} with offset {}",
                         partition.records.sizeInBytes(), tp, position);
                 Iterator<? extends RecordBatch> batches = partition.records.batches().iterator();
@@ -858,6 +876,33 @@ public class Fetcher<K, V> implements SubscriptionState.Listener, Closeable {
                 if (partition.highWatermark >= 0) {
                     log.trace("Updating high watermark for partition {} to {}", tp, partition.highWatermark);
                     subscriptions.updateHighWatermark(tp, partition.highWatermark);
+=======
+                int bytes = 0;
+                ByteBuffer buffer = partition.recordSet;
+                MemoryRecords records = MemoryRecords.readableRecords(buffer);
+                List<ConsumerRecord<K, V>> parsed = new ArrayList<>();
+                boolean skippedRecords = false;
+                for (LogEntry logEntry : records) {
+                    // Skip the messages earlier than current position.
+                    if (logEntry.offset() >= position) {
+                        parsed.add(parseRecord(tp, logEntry));
+                        bytes += logEntry.size();
+                    } else {
+                        skippedRecords = true;
+                    }
+                }
+
+                if (!parsed.isEmpty()) {
+                    log.trace("Adding fetched record for partition {} with offset {} to buffered record list", tp, position);
+                    ConsumerRecord<K, V> record = parsed.get(parsed.size() - 1);
+                    this.records.add(new PartitionRecords<>(fetchOffset, tp, parsed));
+                    this.sensors.recordsFetchLag.record(partition.highWatermark - record.offset());
+                } else if (buffer.limit() > 0 && !skippedRecords) {
+                    // we did not read a single message from a non-empty buffer
+                    // because that message's size is larger than fetch size, in this case
+                    // record this exception
+                    this.recordTooLargePartitions.put(tp, fetchOffset);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 }
 
                 if (partition.lastStableOffset >= 0) {

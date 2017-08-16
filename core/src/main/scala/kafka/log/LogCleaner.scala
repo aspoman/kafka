@@ -575,8 +575,38 @@ private[log] class Cleaner(val id: Int,
       val canDiscardControlBatch = transactionMetadata.onControlBatchRead(batch)
       canDiscardControlBatch && !retainTxnMarkers
     } else {
+<<<<<<< HEAD
       val canDiscardBatch = transactionMetadata.onBatchRead(batch)
       canDiscardBatch
+=======
+      val magicAndTimestamp = MessageSet.magicAndLargestTimestamp(messages)
+      val firstMessageOffset = messageAndOffsets.head
+      val firstAbsoluteOffset = firstMessageOffset.offset
+      var offset = -1L
+      val timestampType = firstMessageOffset.message.timestampType
+      val messageWriter = new MessageWriter(math.min(math.max(MessageSet.messageSetSize(messages) / 2, 1024), 1 << 16))
+      messageWriter.write(codec = compressionCodec, timestamp = magicAndTimestamp.timestamp, timestampType = timestampType, magicValue = messageFormatVersion) { outputStream =>
+        val output = new DataOutputStream(CompressionFactory(compressionCodec, messageFormatVersion, outputStream))
+        try {
+          for (messageOffset <- messageAndOffsets) {
+            val message = messageOffset.message
+            offset = messageOffset.offset
+            if (messageFormatVersion > Message.MagicValue_V0) {
+              // The offset of the messages are absolute offset, compute the inner offset.
+              val innerOffset = messageOffset.offset - firstAbsoluteOffset
+              output.writeLong(innerOffset)
+            } else
+              output.writeLong(offset)
+            output.writeInt(message.size)
+            output.write(message.buffer.array, message.buffer.arrayOffset, message.buffer.limit)
+          }
+        } finally {
+          output.close()
+        }
+      }
+      ByteBufferMessageSet.writeMessage(buffer, messageWriter, offset)
+      stats.recopyMessage(messageWriter.size + MessageSet.LogOverhead)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
   }
 
@@ -709,6 +739,7 @@ private[log] class Cleaner(val id: Int,
 
     // Add all the cleanable dirty segments. We must take at least map.slots * load_factor,
     // but we may be able to fit more (if there is lots of duplication in the dirty section of the log)
+<<<<<<< HEAD
     var full = false
     for (segment <- dirty if !full) {
       checkDone(log.topicPartition)
@@ -717,6 +748,23 @@ private[log] class Cleaner(val id: Int,
         transactionMetadata, stats)
       if (full)
         debug("Offset map is full, %d segments fully mapped, segment with base offset %d is partially mapped".format(dirty.indexOf(segment), segment.baseOffset))
+=======
+    var offset = dirty.head.baseOffset
+    require(offset == start, "Last clean offset is %d but segment base offset is %d for log %s.".format(start, offset, log.name))
+    var full = false
+    for (segment <- dirty if !full) {
+      checkDone(log.topicAndPartition)
+
+      val newOffset = buildOffsetMapForSegment(log.topicAndPartition, segment, map)
+      if (newOffset > -1L)
+        offset = newOffset
+      else {
+        // If not even one segment can fit in the map, compaction cannot happen
+        require(offset > start, "Unable to build the offset map for segment %s/%s. You can increase log.cleaner.dedupe.buffer.size or decrease log.cleaner.threads".format(log.name, segment.log.file.getName))
+        debug("Offset map is full, %d segments fully mapped, segment with base offset %d is partially mapped".format(dirty.indexOf(segment), segment.baseOffset))
+        full = true
+      }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
     info("Offset map for log %s complete.".format(log.name))
   }
@@ -728,6 +776,7 @@ private[log] class Cleaner(val id: Int,
    * @param map The map in which to store the key=>offset mapping
    * @param stats Collector for cleaning statistics
    *
+<<<<<<< HEAD
    * @return If the map was filled whilst loading from this segment
    */
   private def buildOffsetMapForSegment(topicPartition: TopicPartition,
@@ -738,6 +787,13 @@ private[log] class Cleaner(val id: Int,
                                        transactionMetadata: CleanedTransactionMetadata,
                                        stats: CleanerStats): Boolean = {
     var position = segment.index.lookup(startOffset).position
+=======
+   * @return The final offset covered by the map or -1 if the map is full
+   */
+  private def buildOffsetMapForSegment(topicAndPartition: TopicAndPartition, segment: LogSegment, map: OffsetMap): Long = {
+    var position = 0
+    var offset = segment.baseOffset
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     val maxDesiredMapSize = (map.slots * this.dupBufferLoadFactor).toInt
     while (position < segment.log.sizeInBytes) {
       checkDone(topicPartition)
@@ -747,6 +803,7 @@ private[log] class Cleaner(val id: Int,
       throttler.maybeThrottle(records.sizeInBytes)
 
       val startPosition = position
+<<<<<<< HEAD
       for (batch <- records.batches.asScala) {
         if (batch.isControlBatch) {
           transactionMetadata.onControlBatchRead(batch)
@@ -772,6 +829,20 @@ private[log] class Cleaner(val id: Int,
 
         if (batch.lastOffset >= startOffset)
           map.updateLatestOffset(batch.lastOffset)
+=======
+      for (entry <- messages) {
+        val message = entry.message
+        if (message.hasKey) {
+          if (map.size < maxDesiredMapSize)
+            map.put(message.key, entry.offset)
+          else {
+            // The map is full, stop looping and return
+            return -1L
+          }
+        }
+        offset = entry.offset
+        stats.indexMessagesRead(1)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
       }
       val bytesRead = records.validBytes
       position += bytesRead

@@ -27,9 +27,13 @@ import org.apache.kafka.streams.kstream.internals.WindowedSerializer;
 import org.apache.kafka.streams.kstream.internals.WindowedStreamPartitioner;
 import org.apache.kafka.streams.processor.StateStoreSupplier;
 import org.apache.kafka.streams.processor.StreamPartitioner;
+<<<<<<< HEAD
 import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.QueryableStoreType;
 import org.apache.kafka.streams.state.ReadOnlyKeyValueStore;
+=======
+import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 /**
  * {@code KTable} is an abstraction of a <i>changelog stream</i> from a primary-keyed table.
@@ -573,11 +577,17 @@ public interface KTable<K, V> {
                      final Serde<V> valSerde);
 
     /**
+<<<<<<< HEAD
      * Perform an action on each update record of this {@code KTable}.
      * Note that this is a terminal operation that returns void.
      * <p>
      * Note that {@code foreach()} is not applied to the internal state store and only called for each new
      * {@code KTable} update record.
+=======
+     * Materialize this stream to a topic, also creates a new instance of {@link KTable} from the topic
+     * using default serializers and deserializers and producer's {@link DefaultPartitioner}.
+     * This is equivalent to calling {@link #to(String)} and {@link org.apache.kafka.streams.kstream.KStreamBuilder#table(String)}.
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      *
      * @param action an action to perform on each record
      * @deprecated Use the Interactive Queries APIs (e.g., {@link KafkaStreams#store(String, QueryableStoreType) }
@@ -618,6 +628,7 @@ public interface KTable<K, V> {
      * Note that {@link #toStream()} is a logical operation and only changes the "interpretation" of the stream, i.e.,
      * each record of this changelog stream is no longer treated as an update record (cf. {@link KStream} vs {@code KTable}).
      *
+<<<<<<< HEAD
      * @param mapper a {@link KeyValueMapper} that computes a new key for each record
      * @param <KR> the new key type of the result stream
      * @return a {@link KStream} that contains the same records as this {@code KTable}
@@ -636,6 +647,11 @@ public interface KTable<K, V> {
      * The resulting {@code KTable} will be materialized in a local state store with the given store name (cf.
      * {@link StreamsBuilder#table(String, String)})
      * The store name must be a valid Kafka topic name and cannot contain characters other than ASCII alphanumerics, '.', '_' and '-'.
+=======
+     * @param partitioner  the function used to determine how records are distributed among partitions of the topic,
+     *                     if not specified producer's {@link DefaultPartitioner} will be used
+     * @param topic        the topic name
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      *
      * @param topic     the topic name
      * @param queryableStoreName the state store name used for the result {@code KTable}; valid characters are ASCII
@@ -646,6 +662,7 @@ public interface KTable<K, V> {
                          final String queryableStoreName);
 
     /**
+<<<<<<< HEAD
      * Materialize this changelog stream to a topic and creates a new {@code KTable} from the topic using default
      * serializers and deserializers and producer's {@link DefaultPartitioner}.
      * The specified topic should be manually created before it is used (i.e., before the Kafka Streams application is
@@ -657,6 +674,14 @@ public interface KTable<K, V> {
      * The resulting {@code KTable} will be materialized in a local state store with the given store name (cf.
      * {@link StreamsBuilder#table(String, String)})
      * The store name must be a valid Kafka topic name and cannot contain characters other than ASCII alphanumerics, '.', '_' and '-'.
+=======
+     * Materialize this stream to a topic, also creates a new instance of {@link KTable} from the topic.
+     * If {@code keySerde} provides a {@link org.apache.kafka.streams.kstream.internals.WindowedSerializer}
+     * for the key {@link org.apache.kafka.streams.kstream.internals.WindowedStreamPartitioner} is used
+     * &mdash; otherwise producer's {@link DefaultPartitioner} is used.
+     * This is equivalent to calling {@link #to(Serde, Serde, String)} and
+     * {@link org.apache.kafka.streams.kstream.KStreamBuilder#table(Serde, Serde, String)}.
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      *
      * @param topic     the topic name
      * @param storeSupplier user defined state store supplier. Cannot be {@code null}.
@@ -695,6 +720,7 @@ public interface KTable<K, V> {
      * The resulting {@code KTable} will be materialized in a local state store with an internal store name (cf.
      * {@link StreamsBuilder#table(String)})
      *
+<<<<<<< HEAD
      * @param partitioner the function used to determine how records are distributed among partitions of the topic,
      *                    if not specified producer's {@link DefaultPartitioner} will be used
      * @param topic       the topic name
@@ -715,6 +741,17 @@ public interface KTable<K, V> {
      * <p>
      * The resulting {@code KTable} will be materialized in a local state store with the given store name (cf.
      * {@link StreamsBuilder#table(String, String)})
+=======
+     * @param keySerde     key serde used to send key-value pairs,
+     *                     if not specified the default key serde defined in the configuration will be used
+     * @param valSerde     value serde used to send key-value pairs,
+     *                     if not specified the default value serde defined in the configuration will be used
+     * @param partitioner  the function used to determine how records are distributed among partitions of the topic,
+     *                     if not specified and {@code keySerde} provides a {@link org.apache.kafka.streams.kstream.internals.WindowedSerializer} for the key
+     *                     {@link org.apache.kafka.streams.kstream.internals.WindowedStreamPartitioner} will be used
+     *                     &mdash; otherwise {@link DefaultPartitioner} will be used
+     * @param topic        the topic name
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      *
      * @param partitioner the function used to determine how records are distributed among partitions of the topic,
      *                    if not specified producer's {@link DefaultPartitioner} will be used
@@ -728,6 +765,7 @@ public interface KTable<K, V> {
                          final String queryableStoreName);
 
     /**
+<<<<<<< HEAD
      * Materialize this changelog stream to a topic and creates a new {@code KTable} from the topic using default
      * serializers and deserializers and a customizable {@link StreamPartitioner} to determine the distribution of
      * records to partitions.
@@ -739,6 +777,10 @@ public interface KTable<K, V> {
      * <p>
      * The resulting {@code KTable} will be materialized in a local state store with the given store name (cf.
      * {@link StreamsBuilder#table(String, String)})
+=======
+     * Materialize this stream to a topic using default serializers specified in the config
+     * and producer's {@link DefaultPartitioner}.
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      *
      * @param partitioner the function used to determine how records are distributed among partitions of the topic,
      *                    if not specified producer's {@link DefaultPartitioner} will be used
@@ -764,6 +806,7 @@ public interface KTable<K, V> {
      * The resulting {@code KTable} will be materialized in a local state store with the given store name (cf.
      * {@link StreamsBuilder#table(String, String)})
      *
+<<<<<<< HEAD
      * @param keySerde  key serde used to send key-value pairs,
      *                  if not specified the default key serde defined in the configuration will be used
      * @param valSerde  value serde used to send key-value pairs,
@@ -772,12 +815,18 @@ public interface KTable<K, V> {
      * @param queryableStoreName the state store name used for the result {@code KTable}.
      *                           If {@code null} this is the equivalent of {@link KTable#through(Serde, Serde, String)()}
      * @return a {@code KTable} that contains the exact same (and potentially repartitioned) records as this {@code KTable}
+=======
+     * @param partitioner  the function used to determine how records are distributed among partitions of the topic,
+     *                     if not specified producer's {@link DefaultPartitioner} will be used
+     * @param topic        the topic name
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      */
     KTable<K, V> through(final Serde<K> keySerde, Serde<V> valSerde,
                          final String topic,
                          final String queryableStoreName);
 
     /**
+<<<<<<< HEAD
      * Materialize this changelog stream to a topic and creates a new {@code KTable} from the topic.
      * The specified topic should be manually created before it is used (i.e., before the Kafka Streams application is
      * started).
@@ -790,6 +839,12 @@ public interface KTable<K, V> {
      * <p>
      * The resulting {@code KTable} will be materialized in a local state store with the given store name (cf.
      * {@link StreamsBuilder#table(String, String)})
+=======
+     * Materialize this stream to a topic. If {@code keySerde} provides a
+     * {@link org.apache.kafka.streams.kstream.internals.WindowedSerializer} for the key
+     * {@link org.apache.kafka.streams.kstream.internals.WindowedStreamPartitioner} is used
+     * &mdash; otherwise producer's {@link DefaultPartitioner} is used.
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      *
      * @param keySerde  key serde used to send key-value pairs,
      *                  if not specified the default key serde defined in the configuration will be used
@@ -817,12 +872,24 @@ public interface KTable<K, V> {
      * The resulting {@code KTable} will be materialized in a local state store with an interna; store name (cf.
      * {@link StreamsBuilder#table(String)})
      *
+<<<<<<< HEAD
      * @param keySerde  key serde used to send key-value pairs,
      *                  if not specified the default key serde defined in the configuration will be used
      * @param valSerde  value serde used to send key-value pairs,
      *                  if not specified the default value serde defined in the configuration will be used
      * @param topic     the topic name
      * @return a {@code KTable} that contains the exact same (and potentially repartitioned) records as this {@code KTable}
+=======
+     * @param keySerde     key serde used to send key-value pairs,
+     *                     if not specified the default serde defined in the configs will be used
+     * @param valSerde     value serde used to send key-value pairs,
+     *                     if not specified the default serde defined in the configs will be used
+     * @param partitioner  the function used to determine how records are distributed among partitions of the topic,
+     *                     if not specified and {@code keySerde} provides a {@link org.apache.kafka.streams.kstream.internals.WindowedSerializer} for the key
+     *                     {@link org.apache.kafka.streams.kstream.internals.WindowedStreamPartitioner} will be used
+     *                     &mdash; otherwise {@link DefaultPartitioner} will be used
+     * @param topic        the topic name
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      */
     KTable<K, V> through(final Serde<K> keySerde, Serde<V> valSerde,
                          final String topic);
@@ -903,6 +970,7 @@ public interface KTable<K, V> {
      * The resulting {@code KTable} will be materialized in a local state store with an internal store name (cf.
      * {@link StreamsBuilder#table(String)})
      *
+<<<<<<< HEAD
      * @param keySerde    key serde used to send key-value pairs,
      *                    if not specified the default key serde defined in the configuration will be used
      * @param valSerde    value serde used to send key-value pairs,
@@ -913,6 +981,11 @@ public interface KTable<K, V> {
      *                    be used
      * @param topic      the topic name
      * @return a {@code KTable} that contains the exact same (and potentially repartitioned) records as this {@code KTable}
+=======
+     * @return a {@link KStream} that contains the transformed records from this {@link KTable};
+     *         the records are no longer treated as updates on a primary-keyed table,
+     *         but rather as normal key-value pairs in a record stream
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      */
     KTable<K, V> through(final Serde<K> keySerde,
                          final Serde<V> valSerde,

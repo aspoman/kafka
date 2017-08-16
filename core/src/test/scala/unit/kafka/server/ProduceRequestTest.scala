@@ -17,10 +17,17 @@
 
 package kafka.server
 
+<<<<<<< HEAD
 import kafka.utils.TestUtils
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.protocol.{ApiKeys, Errors}
 import org.apache.kafka.common.record.{CompressionType, DefaultRecordBatch, MemoryRecords, RecordBatch, SimpleRecord}
+=======
+import kafka.message.{ByteBufferMessageSet, LZ4CompressionCodec, Message}
+import kafka.utils.TestUtils
+import org.apache.kafka.common.TopicPartition
+import org.apache.kafka.common.protocol.{ApiKeys, Errors, ProtoUtils}
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.common.requests.{ProduceRequest, ProduceResponse}
 import org.junit.Assert._
 import org.junit.Test
@@ -36,6 +43,7 @@ class ProduceRequestTest extends BaseRequestTest {
   @Test
   def testSimpleProduceRequest() {
     val (partition, leader) = createTopicAndFindPartitionWithLeader("topic")
+<<<<<<< HEAD
 
     def sendAndCheck(memoryRecords: MemoryRecords, expectedOffset: Long): ProduceResponse.PartitionResponse = {
       val topicPartition = new TopicPartition("topic", partition)
@@ -57,19 +65,37 @@ class ProduceRequestTest extends BaseRequestTest {
     sendAndCheck(MemoryRecords.withRecords(CompressionType.GZIP,
       new SimpleRecord(System.currentTimeMillis(), "key1".getBytes, "value1".getBytes),
       new SimpleRecord(System.currentTimeMillis(), "key2".getBytes, "value2".getBytes)), 1)
+=======
+    val messageBuffer = new ByteBufferMessageSet(new Message("value".getBytes, "key".getBytes,
+      System.currentTimeMillis(), 1: Byte)).buffer
+    val topicPartition = new TopicPartition("topic", partition)
+    val partitionRecords = Map(topicPartition -> messageBuffer)
+    val produceResponse = sendProduceRequest(leader, new ProduceRequest(-1, 3000, partitionRecords.asJava))
+    assertEquals(1, produceResponse.responses.size)
+    val (tp, partitionResponse) = produceResponse.responses.asScala.head
+    assertEquals(topicPartition, tp)
+    assertEquals(Errors.NONE.code, partitionResponse.errorCode)
+    assertEquals(0, partitionResponse.baseOffset)
+    assertEquals(-1, partitionResponse.timestamp)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 
   /* returns a pair of partition id and leader id */
   private def createTopicAndFindPartitionWithLeader(topic: String): (Int, Int) = {
     val partitionToLeader = TestUtils.createTopic(zkUtils, topic, 3, 2, servers)
     partitionToLeader.collectFirst {
+<<<<<<< HEAD
       case (partition, leader) if leader != -1 => (partition, leader)
+=======
+      case (partition, Some(leader)) if leader != -1 => (partition, leader)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }.getOrElse(fail(s"No leader elected for topic $topic"))
   }
 
   @Test
   def testCorruptLz4ProduceRequest() {
     val (partition, leader) = createTopicAndFindPartitionWithLeader("topic")
+<<<<<<< HEAD
     val timestamp = 1000000
     val memoryRecords = MemoryRecords.withRecords(CompressionType.LZ4,
       new SimpleRecord(timestamp, "key".getBytes, "value".getBytes))
@@ -91,6 +117,29 @@ class ProduceRequestTest extends BaseRequestTest {
   private def sendProduceRequest(leaderId: Int, request: ProduceRequest): ProduceResponse = {
     val response = connectAndSend(request, ApiKeys.PRODUCE, destination = brokerSocketServer(leaderId))
     ProduceResponse.parse(response, request.version)
+=======
+    val messageBuffer = new ByteBufferMessageSet(LZ4CompressionCodec, new Message("value".getBytes, "key".getBytes,
+      System.currentTimeMillis(), 1: Byte)).buffer
+    // Change the lz4 checksum value so that it doesn't match the contents
+    messageBuffer.array.update(40, 0)
+    val topicPartition = new TopicPartition("topic", partition)
+    val partitionRecords = Map(topicPartition -> messageBuffer)
+    val produceResponse = sendProduceRequest(leader, new ProduceRequest(-1, 3000, partitionRecords.asJava))
+    assertEquals(1, produceResponse.responses.size)
+    val (tp, partitionResponse) = produceResponse.responses.asScala.head
+    assertEquals(topicPartition, tp)
+    assertEquals(Errors.CORRUPT_MESSAGE.code, partitionResponse.errorCode)
+    assertEquals(-1, partitionResponse.baseOffset)
+    assertEquals(-1, partitionResponse.timestamp)
+  }
+
+  private def sendProduceRequest(leaderId: Int, request: ProduceRequest): ProduceResponse = {
+    val socket = connect(s = servers.find(_.config.brokerId == leaderId).map(_.socketServer).getOrElse {
+      fail(s"Could not find broker with id $leaderId")
+    })
+    val response = send(socket, request, ApiKeys.PRODUCE, ProtoUtils.latestVersion(ApiKeys.PRODUCE.id))
+    ProduceResponse.parse(response)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 
 }

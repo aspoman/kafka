@@ -21,12 +21,15 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
 import org.apache.kafka.common.config.ConfigDef.Width;
+<<<<<<< HEAD
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.connect.connector.ConnectRecord;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.runtime.isolation.PluginDesc;
 import org.apache.kafka.connect.runtime.isolation.Plugins;
 import org.apache.kafka.connect.transforms.Transformation;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,7 +54,10 @@ import static org.apache.kafka.common.config.ConfigDef.Range.atLeast;
  */
 public class ConnectorConfig extends AbstractConfig {
     protected static final String COMMON_GROUP = "Common";
+<<<<<<< HEAD
     protected static final String TRANSFORMS_GROUP = "Transforms";
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     public static final String NAME_CONFIG = "name";
     private static final String NAME_DOC = "Globally unique name to use for this connector.";
@@ -79,6 +85,7 @@ public class ConnectorConfig extends AbstractConfig {
 
     private static final String TASK_MAX_DISPLAY = "Tasks max";
 
+<<<<<<< HEAD
     public static final String TRANSFORMS_CONFIG = "transforms";
     private static final String TRANSFORMS_DOC = "Aliases for the transformations to be applied to records.";
     private static final String TRANSFORMS_DISPLAY = "Transforms";
@@ -127,6 +134,13 @@ public class ConnectorConfig extends AbstractConfig {
                 enrich(plugins, configDef, props, true),
                 props
         );
+=======
+    public static ConfigDef configDef() {
+        return new ConfigDef()
+            .define(NAME_CONFIG, Type.STRING, Importance.HIGH, NAME_DOC, COMMON_GROUP, 1, Width.MEDIUM, NAME_DISPLAY)
+            .define(CONNECTOR_CLASS_CONFIG, Type.STRING, Importance.HIGH, CONNECTOR_CLASS_DOC, COMMON_GROUP, 2, Width.LONG, CONNECTOR_CLASS_DISPLAY)
+            .define(TASKS_MAX_CONFIG, Type.INT, TASKS_MAX_DEFAULT,  atLeast(TASKS_MIN_CONFIG), Importance.HIGH, TASKS_MAX_DOC, COMMON_GROUP, 3, Width.SHORT, TASK_MAX_DISPLAY);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     @Override
@@ -134,6 +148,7 @@ public class ConnectorConfig extends AbstractConfig {
         return enrichedConfig.get(key);
     }
 
+<<<<<<< HEAD
     /**
      * Returns the initialized list of {@link Transformation} which are specified in {@link #TRANSFORMS_CONFIG}.
      */
@@ -210,6 +225,14 @@ public class ConnectorConfig extends AbstractConfig {
         }
 
         return newDef;
+=======
+    public ConnectorConfig(Map<String, String> props) {
+        super(configDef(), props);
+    }
+
+    public ConnectorConfig(ConfigDef subClassConfig, Map<String, String> props) {
+        super(subClassConfig, props);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /**

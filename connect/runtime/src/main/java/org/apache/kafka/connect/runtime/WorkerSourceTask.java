@@ -301,7 +301,11 @@ class WorkerSourceTask extends WorkerTask {
                 try {
                     long timeoutMs = timeout - time.milliseconds();
                     if (timeoutMs <= 0) {
+<<<<<<< HEAD
                         log.error("{} Failed to flush, timed out while waiting for producer to flush outstanding {} messages", this, outstandingMessages.size());
+=======
+                        log.error("Failed to flush {}, timed out while waiting for producer to flush outstanding {} messages", this, outstandingMessages.size());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                         finishFailedFlush();
                         return false;
                     }

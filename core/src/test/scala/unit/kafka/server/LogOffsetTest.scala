@@ -18,7 +18,11 @@
 package kafka.server
 
 import java.io.File
+<<<<<<< HEAD
 import java.util.concurrent.atomic.AtomicInteger
+=======
+import java.util.concurrent.atomic.AtomicLong
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import java.util.{Properties, Random}
 
 import kafka.admin.AdminUtils
@@ -26,12 +30,20 @@ import kafka.api.{FetchRequestBuilder, OffsetRequest, PartitionOffsetRequestInfo
 import kafka.common.TopicAndPartition
 import kafka.consumer.SimpleConsumer
 import kafka.log.{Log, LogSegment}
+<<<<<<< HEAD
+=======
+import kafka.message.{ByteBufferMessageSet, Message, NoCompressionCodec}
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import kafka.utils.TestUtils._
 import kafka.utils._
 import kafka.zk.ZooKeeperTestHarness
 import org.apache.kafka.common.TopicPartition
 import org.apache.kafka.common.protocol.Errors
+<<<<<<< HEAD
 import org.apache.kafka.common.utils.{Time, Utils}
+=======
+import org.apache.kafka.common.utils.Utils
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.easymock.{EasyMock, IAnswer}
 import org.junit.Assert._
 import org.junit.{After, Before, Test}
@@ -235,9 +247,15 @@ class LogOffsetTest extends ZooKeeperTestHarness {
   def testFetchOffsetsBeforeWithChangingSegmentSize() {
     val log = EasyMock.niceMock(classOf[Log])
     val logSegment = EasyMock.niceMock(classOf[LogSegment])
+<<<<<<< HEAD
     EasyMock.expect(logSegment.size).andStubAnswer(new IAnswer[Int] {
       private val value = new AtomicInteger(0)
       def answer: Int = value.getAndIncrement()
+=======
+    EasyMock.expect(logSegment.size).andStubAnswer(new IAnswer[Long] {
+      private val value = new AtomicLong(0)
+      def answer: Long = value.getAndIncrement()
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     })
     EasyMock.replay(logSegment)
     val logSegments = Seq(logSegment)
@@ -246,6 +264,7 @@ class LogOffsetTest extends ZooKeeperTestHarness {
     server.apis.fetchOffsetsBefore(log, System.currentTimeMillis, 100)
   }
 
+<<<<<<< HEAD
   /* We test that `fetchOffsetsBefore` works correctly if `Log.logSegments` content and size are
    * different (simulating a race condition) */
   @Test
@@ -265,6 +284,8 @@ class LogOffsetTest extends ZooKeeperTestHarness {
     server.apis.fetchOffsetsBefore(log, System.currentTimeMillis, 100)
   }
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   private def createBrokerConfig(nodeId: Int): Properties = {
     val props = new Properties
     props.put("broker.id", nodeId.toString)

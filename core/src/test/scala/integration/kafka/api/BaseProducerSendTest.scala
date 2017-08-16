@@ -255,6 +255,10 @@ abstract class BaseProducerSendTest extends KafkaServerTestHarness {
         else
           assertEquals(record.timestamp, recordMetadata.timestamp)
       }
+<<<<<<< HEAD
+=======
+      producer.close(10000L, TimeUnit.MILLISECONDS)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
       assertEquals(s"Should have offset $numRecords but only successfully sent ${callback.offset}", numRecords, callback.offset)
     } finally {
       producer.close()

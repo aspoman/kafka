@@ -100,6 +100,11 @@ class KafkaServer(val config: KafkaConfig, time: Time = Time.SYSTEM, threadNameP
   private var shutdownLatch = new CountDownLatch(1)
 
   private val jmxPrefix: String = "kafka.server"
+<<<<<<< HEAD
+=======
+  private val reporters: java.util.List[MetricsReporter] = config.metricReporterClasses
+  reporters.add(new JmxReporter(jmxPrefix))
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
   var metrics: Metrics = null
 

@@ -18,10 +18,20 @@
 package kafka.message
 
 import java.nio.ByteBuffer
+<<<<<<< HEAD
 
 import kafka.common.LongRef
 import kafka.utils.Logging
 import org.apache.kafka.common.record._
+=======
+import java.nio.channels._
+import java.io._
+import java.util.ArrayDeque
+
+import org.apache.kafka.common.errors.InvalidTimestampException
+import org.apache.kafka.common.record.TimestampType
+import org.apache.kafka.common.utils.Utils
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 import scala.collection.JavaConverters._
 
@@ -33,6 +43,7 @@ object ByteBufferMessageSet {
                      messages: Message*): ByteBuffer = {
     if (messages.isEmpty)
       MessageSet.Empty.buffer
+<<<<<<< HEAD
     else {
       val buffer = ByteBuffer.allocate(math.min(math.max(MessageSet.messageSetSize(messages) / 2, 1024), 1 << 16))
       val builder = MemoryRecords.builder(buffer, messages.head.magic, CompressionType.forId(compressionCodec.codec),
@@ -40,6 +51,131 @@ object ByteBufferMessageSet {
 
       for (message <- messages)
         builder.appendWithOffset(offsetAssigner.nextAbsoluteOffset(), message.asRecord)
+=======
+    else if (compressionCodec == NoCompressionCodec) {
+      val buffer = ByteBuffer.allocate(MessageSet.messageSetSize(messages))
+      for (message <- messages) writeMessage(buffer, message, offsetAssigner.nextAbsoluteOffset())
+      buffer.rewind()
+      buffer
+    } else {
+      val magicAndTimestamp = wrapperMessageTimestamp match {
+        case Some(ts) => MagicAndTimestamp(messages.head.magic, ts)
+        case None => MessageSet.magicAndLargestTimestamp(messages)
+      }
+      var offset = -1L
+      val messageWriter = new MessageWriter(math.min(math.max(MessageSet.messageSetSize(messages) / 2, 1024), 1 << 16))
+      messageWriter.write(codec = compressionCodec, timestamp = magicAndTimestamp.timestamp, timestampType = timestampType, magicValue = magicAndTimestamp.magic) { outputStream =>
+        val output = new DataOutputStream(CompressionFactory(compressionCodec, magicAndTimestamp.magic, outputStream))
+        try {
+          for (message <- messages) {
+            offset = offsetAssigner.nextAbsoluteOffset()
+            if (message.magic != magicAndTimestamp.magic)
+              throw new IllegalArgumentException("Messages in the message set must have same magic value")
+            // Use inner offset if magic value is greater than 0
+            if (magicAndTimestamp.magic > Message.MagicValue_V0)
+              output.writeLong(offsetAssigner.toInnerOffset(offset))
+            else
+              output.writeLong(offset)
+            output.writeInt(message.size)
+            output.write(message.buffer.array, message.buffer.arrayOffset, message.buffer.limit)
+          }
+        } finally {
+          output.close()
+        }
+      }
+      val buffer = ByteBuffer.allocate(messageWriter.size + MessageSet.LogOverhead)
+      writeMessage(buffer, messageWriter, offset)
+      buffer.rewind()
+      buffer
+    }
+  }
+
+  /** Deep iterator that decompresses the message sets and adjusts timestamp and offset if needed. */
+  def deepIterator(wrapperMessageAndOffset: MessageAndOffset): Iterator[MessageAndOffset] = {
+
+    import Message._
+
+    new IteratorTemplate[MessageAndOffset] {
+
+      val MessageAndOffset(wrapperMessage, wrapperMessageOffset) = wrapperMessageAndOffset
+      val wrapperMessageTimestampOpt: Option[Long] =
+        if (wrapperMessage.magic > MagicValue_V0) Some(wrapperMessage.timestamp) else None
+      val wrapperMessageTimestampTypeOpt: Option[TimestampType] =
+        if (wrapperMessage.magic > MagicValue_V0) Some(wrapperMessage.timestampType) else None
+      if (wrapperMessage.payload == null)
+        throw new KafkaException(s"Message payload is null: $wrapperMessage")
+      val inputStream = new ByteBufferBackedInputStream(wrapperMessage.payload)
+      val compressed = try {
+        new DataInputStream(CompressionFactory(wrapperMessage.compressionCodec, wrapperMessage.magic, inputStream))
+      } catch {
+        case ioe: IOException =>
+          throw new InvalidMessageException(s"Failed to instantiate input stream compressed with ${wrapperMessage.compressionCodec}", ioe)
+      }
+      var lastInnerOffset = -1L
+
+      val messageAndOffsets = if (wrapperMessageAndOffset.message.magic > MagicValue_V0) {
+        val innerMessageAndOffsets = new ArrayDeque[MessageAndOffset]()
+        try {
+          while (true)
+            innerMessageAndOffsets.add(readMessageFromStream())
+        } catch {
+          case eofe: EOFException =>
+            compressed.close()
+          case ioe: IOException =>
+            throw new InvalidMessageException(s"Error while reading message from stream compressed with ${wrapperMessage.compressionCodec}", ioe)
+        }
+        Some(innerMessageAndOffsets)
+      } else None
+
+      private def readMessageFromStream(): MessageAndOffset = {
+        val innerOffset = compressed.readLong()
+        val recordSize = compressed.readInt()
+
+        if (recordSize < MinMessageOverhead)
+          throw new InvalidMessageException(s"Message found with corrupt size `$recordSize` in deep iterator")
+
+        // read the record into an intermediate record buffer (i.e. extra copy needed)
+        val bufferArray = new Array[Byte](recordSize)
+        compressed.readFully(bufferArray, 0, recordSize)
+        val buffer = ByteBuffer.wrap(bufferArray)
+
+        // Override the timestamp if necessary
+        val newMessage = new Message(buffer, wrapperMessageTimestampOpt, wrapperMessageTimestampTypeOpt)
+
+        // Inner message and wrapper message must have same magic value
+        if (newMessage.magic != wrapperMessage.magic)
+          throw new IllegalStateException(s"Compressed message has magic value ${wrapperMessage.magic} " +
+            s"but inner message has magic value ${newMessage.magic}")
+        lastInnerOffset = innerOffset
+        new MessageAndOffset(newMessage, innerOffset)
+      }
+
+      override def makeNext(): MessageAndOffset = {
+        messageAndOffsets match {
+          // Using inner offset and timestamps
+          case Some(innerMessageAndOffsets) =>
+            innerMessageAndOffsets.pollFirst() match {
+              case null => allDone()
+              case MessageAndOffset(message, offset) =>
+                val relativeOffset = offset - lastInnerOffset
+                val absoluteOffset = wrapperMessageOffset + relativeOffset
+                new MessageAndOffset(message, absoluteOffset)
+            }
+          // Not using inner offset and timestamps
+          case None =>
+            try readMessageFromStream()
+            catch {
+              case eofe: EOFException =>
+                compressed.close()
+                allDone()
+              case ioe: IOException =>
+                throw new KafkaException(ioe)
+            }
+        }
+      }
+    }
+  }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
       builder.build().buffer
     }

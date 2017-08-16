@@ -16,8 +16,27 @@
  */
 package org.apache.kafka.clients.producer.internals;
 
+<<<<<<< HEAD
 import org.apache.kafka.clients.ApiVersions;
 import org.apache.kafka.clients.NodeApiVersions;
+=======
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.Cluster;
@@ -39,8 +58,12 @@ import org.apache.kafka.common.record.Record;
 import org.apache.kafka.common.record.TimestampType;
 import org.apache.kafka.common.requests.ApiVersionsResponse;
 import org.apache.kafka.common.utils.MockTime;
+<<<<<<< HEAD
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.test.TestUtils;
+=======
+import org.apache.kafka.common.utils.SystemTime;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.junit.After;
 import org.junit.Test;
 
@@ -80,6 +103,7 @@ public class RecordAccumulatorTest {
     private PartitionInfo part2 = new PartitionInfo(topic, partition2, node1, null, null);
     private PartitionInfo part3 = new PartitionInfo(topic, partition3, node2, null, null);
     private MockTime time = new MockTime();
+    private SystemTime systemTime = new SystemTime();
     private byte[] key = "key".getBytes();
     private byte[] value = "value".getBytes();
     private int msgSize = DefaultRecord.sizeInBytes(0, 0, key.length, value.length,
@@ -423,6 +447,34 @@ public class RecordAccumulatorTest {
             assertFalse("flushInProgress count should be decremented even if thread is interrupted", accum.flushInProgress());
         }
     }
+
+
+    private void delayedInterrupt(final Thread thread, final long delayMs) {
+        Thread t = new Thread() {
+            public void run() {
+                systemTime.sleep(delayMs);
+                thread.interrupt();
+            }
+        };
+        t.start();
+    }
+
+    @Test
+    public void testAwaitFlushComplete() throws Exception {
+        RecordAccumulator accum = new RecordAccumulator(4 * 1024, 64 * 1024, CompressionType.NONE, Long.MAX_VALUE, 100L, metrics, time);
+        accum.append(new TopicPartition(topic, 0), 0L, key, value, null, maxBlockTimeMs);
+
+        accum.beginFlush();
+        assertTrue(accum.flushInProgress());
+        delayedInterrupt(Thread.currentThread(), 1000L);
+        try {
+            accum.awaitFlushCompletion();
+            fail("awaitFlushCompletion should throw InterruptException");
+        } catch (InterruptedException e) {
+            assertFalse("flushInProgress count should be decremented even if thread is interrupted", accum.flushInProgress());
+        }
+    }
+
 
     @Test
     public void testAbortIncompleteBatches() throws Exception {

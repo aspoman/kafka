@@ -53,14 +53,24 @@ class KafkaVersion(LooseVersion):
 
 def get_version(node=None):
     """Return the version attached to the given node.
+<<<<<<< HEAD:tests/kafkatest/version.py
     Default to DEV_BRANCH if node or node.version is undefined (aka None)
+=======
+    Default to trunk if node or node.version is undefined (aka None)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3:tests/kafkatest/version.py
     """
     if node is not None and hasattr(node, "version") and node.version is not None:
         return node.version
     else:
+<<<<<<< HEAD:tests/kafkatest/version.py
         return DEV_BRANCH
 
 DEV_BRANCH = KafkaVersion("dev")
+=======
+        return TRUNK
+
+TRUNK = KafkaVersion("trunk")
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3:tests/kafkatest/version.py
 
 # 0.8.2.X versions
 V_0_8_2_1 = KafkaVersion("0.8.2.1")

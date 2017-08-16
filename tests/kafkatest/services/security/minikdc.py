@@ -14,7 +14,10 @@
 # limitations under the License.
 
 import os
+<<<<<<< HEAD
 import random
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import uuid
 from io import open
 from os import remove, close
@@ -24,7 +27,11 @@ from tempfile import mkstemp
 from ducktape.services.service import Service
 
 from kafkatest.directory_layout.kafka_path import KafkaPathResolverMixin, CORE_LIBS_JAR_NAME, CORE_DEPENDANT_TEST_LIBS_JAR_NAME
+<<<<<<< HEAD
 from kafkatest.version import DEV_BRANCH
+=======
+from kafkatest.version import TRUNK
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 class MiniKdc(KafkaPathResolverMixin, Service):
@@ -41,6 +48,7 @@ class MiniKdc(KafkaPathResolverMixin, Service):
     KRB5CONF_FILE = "/mnt/minikdc/krb5.conf"
     LOG_FILE = "/mnt/minikdc/minikdc.log"
 
+<<<<<<< HEAD
     LOCAL_KEYTAB_FILE = None
     LOCAL_KRB5CONF_FILE = None
 
@@ -71,6 +79,8 @@ class MiniKdc(KafkaPathResolverMixin, Service):
             MiniKdc.LOCAL_KRB5CONF_FILE = os.path.join(local_scratch_dir, "krb5conf")
         return MiniKdc.LOCAL_KRB5CONF_FILE
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     def __init__(self, context, kafka_nodes, extra_principals=""):
         super(MiniKdc, self).__init__(context, 1)
         self.kafka_nodes = kafka_nodes
@@ -103,8 +113,13 @@ class MiniKdc(KafkaPathResolverMixin, Service):
         principals = 'client ' + kafka_principals + ' ' + self.extra_principals
         self.logger.info("Starting MiniKdc with principals " + principals)
 
+<<<<<<< HEAD
         core_libs_jar = self.path.jar(CORE_LIBS_JAR_NAME, DEV_BRANCH)
         core_dependant_test_libs_jar = self.path.jar(CORE_DEPENDANT_TEST_LIBS_JAR_NAME, DEV_BRANCH)
+=======
+        core_libs_jar = self.path.jar(CORE_LIBS_JAR_NAME, TRUNK)
+        core_dependant_test_libs_jar = self.path.jar(CORE_DEPENDANT_TEST_LIBS_JAR_NAME, TRUNK)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         cmd = "for file in %s; do CLASSPATH=$CLASSPATH:$file; done;" % core_libs_jar
         cmd += " for file in %s; do CLASSPATH=$CLASSPATH:$file; done;" % core_dependant_test_libs_jar

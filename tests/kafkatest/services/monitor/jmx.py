@@ -13,9 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+<<<<<<< HEAD
 from ducktape.cluster.remoteaccount import RemoteCommandError
 from ducktape.utils.util import wait_until
 from kafkatest.version import get_version, V_0_11_0_0, DEV_BRANCH
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 class JmxMixin(object):
     """This mixin helps existing service subclasses start JmxTool on their worker nodes and collect jmx stats.
@@ -23,7 +26,10 @@ class JmxMixin(object):
     A couple things worth noting:
     - this is not a service in its own right.
     - we assume the service using JmxMixin also uses KafkaPathResolverMixin
+<<<<<<< HEAD
     - this uses the --wait option for JmxTool, so the list of object names must be explicit; no patterns are permitted
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     """
     def __init__(self, num_nodes, jmx_object_names=None, jmx_attributes=None):
         self.jmx_object_names = jmx_object_names
@@ -51,6 +57,7 @@ class JmxMixin(object):
             self.logger.debug("%s: jmx tool has been started already on this node" % node.account)
             return
 
+<<<<<<< HEAD
         # JmxTool is not particularly robust to slow-starting processes. In order to ensure JmxTool doesn't fail if the
         # process we're trying to monitor takes awhile before listening on the JMX port, wait until we can see that port
         # listening before even launching JmxTool
@@ -68,6 +75,10 @@ class JmxMixin(object):
         cmd = "%s kafka.tools.JmxTool " % self.path.script("kafka-run-class.sh", use_jmxtool_version)
         cmd += "--reporting-interval 1000 --jmx-url service:jmx:rmi:///jndi/rmi://127.0.0.1:%d/jmxrmi" % self.jmx_port
         cmd += " --wait"
+=======
+        cmd = "%s kafka.tools.JmxTool " % self.path.script("kafka-run-class.sh", node)
+        cmd += "--reporting-interval 1000 --jmx-url service:jmx:rmi:///jndi/rmi://127.0.0.1:%d/jmxrmi" % self.jmx_port
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         for jmx_object_name in self.jmx_object_names:
             cmd += " --object-name %s" % jmx_object_name
         for jmx_attribute in self.jmx_attributes:

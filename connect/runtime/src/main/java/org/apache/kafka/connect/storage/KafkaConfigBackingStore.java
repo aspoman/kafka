@@ -501,7 +501,11 @@ public class KafkaConfigBackingStore implements ConfigBackingStore {
 
                 // Note that we do not notify the update listener if the target state has been removed.
                 // Instead we depend on the removal callback of the connector config itself to notify the worker.
+<<<<<<< HEAD
                 if (started && !removed)
+=======
+                if (!starting && !removed)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                     updateListener.onConnectorTargetStateChange(connectorName);
 
             } else if (record.key().startsWith(CONNECTOR_PREFIX)) {

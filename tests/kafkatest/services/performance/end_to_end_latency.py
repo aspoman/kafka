@@ -17,7 +17,11 @@ import os
 
 from kafkatest.services.performance import PerformanceService
 from kafkatest.services.security.security_config import SecurityConfig
+<<<<<<< HEAD
 from kafkatest.version import DEV_BRANCH, V_0_9_0_0
+=======
+from kafkatest.version import TRUNK, V_0_9_0_0
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 
@@ -45,7 +49,11 @@ class EndToEndLatencyService(PerformanceService):
             "collect_default": True}
     }
 
+<<<<<<< HEAD
     def __init__(self, context, num_nodes, kafka, topic, num_records, compression_type="none", version=DEV_BRANCH, acks=1):
+=======
+    def __init__(self, context, num_nodes, kafka, topic, num_records, compression_type="none", version=TRUNK, acks=1):
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         super(EndToEndLatencyService, self).__init__(context, num_nodes)
         self.kafka = kafka
         self.security_config = kafka.security_config.client_config()

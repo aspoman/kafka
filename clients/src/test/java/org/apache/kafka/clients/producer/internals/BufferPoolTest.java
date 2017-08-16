@@ -22,7 +22,11 @@ import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.metrics.Sensor;
 import org.apache.kafka.common.metrics.stats.Rate;
 import org.apache.kafka.common.utils.MockTime;
+<<<<<<< HEAD
 import org.apache.kafka.common.utils.Time;
+=======
+import org.apache.kafka.common.utils.SystemTime;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.test.TestUtils;
 import org.junit.After;
 import org.junit.Test;
@@ -34,6 +38,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+<<<<<<< HEAD
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import org.junit.runner.RunWith;
@@ -49,6 +54,10 @@ import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.anyString;
 import static org.junit.Assert.assertEquals;
+=======
+import java.util.concurrent.locks.Condition;
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -57,6 +66,10 @@ import static org.junit.Assert.fail;
 @RunWith(PowerMockRunner.class)
 public class BufferPoolTest {
     private final MockTime time = new MockTime();
+<<<<<<< HEAD
+=======
+    private final SystemTime systemTime = new SystemTime();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     private final Metrics metrics = new Metrics(time);
     private final long maxBlockTimeMs = 2000;
     private final String metricGroup = "TestMetrics";
@@ -140,7 +153,11 @@ public class BufferPoolTest {
     private void delayedDeallocate(final BufferPool pool, final ByteBuffer buffer, final long delayMs) {
         Thread thread = new Thread() {
             public void run() {
+<<<<<<< HEAD
                 Time.SYSTEM.sleep(delayMs);
+=======
+                systemTime.sleep(delayMs);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 pool.deallocate(buffer);
             }
         };
@@ -170,7 +187,11 @@ public class BufferPoolTest {
      */
     @Test
     public void testBlockTimeout() throws Exception {
+<<<<<<< HEAD
         BufferPool pool = new BufferPool(10, 1, metrics, Time.SYSTEM, metricGroup);
+=======
+        BufferPool pool = new BufferPool(10, 1, metrics, systemTime, metricGroup);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         ByteBuffer buffer1 = pool.allocate(1, maxBlockTimeMs);
         ByteBuffer buffer2 = pool.allocate(1, maxBlockTimeMs);
         ByteBuffer buffer3 = pool.allocate(1, maxBlockTimeMs);
@@ -180,15 +201,23 @@ public class BufferPoolTest {
         // The third buffer will be de-allocated after maxBlockTimeMs since the most recent de-allocation
         delayedDeallocate(pool, buffer3, maxBlockTimeMs / 2 * 5);
 
+<<<<<<< HEAD
         long beginTimeMs = Time.SYSTEM.milliseconds();
+=======
+        long beginTimeMs = systemTime.milliseconds();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         try {
             pool.allocate(10, maxBlockTimeMs);
             fail("The buffer allocated more memory than its maximum value 10");
         } catch (TimeoutException e) {
             // this is good
         }
+<<<<<<< HEAD
         assertTrue("available memory" + pool.availableMemory(), pool.availableMemory() >= 9 && pool.availableMemory() <= 10);
         long endTimeMs = Time.SYSTEM.milliseconds();
+=======
+        long endTimeMs = systemTime.milliseconds();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         assertTrue("Allocation should finish not much later than maxBlockTimeMs", endTimeMs - beginTimeMs < maxBlockTimeMs + 1000);
     }
 
@@ -242,6 +271,7 @@ public class BufferPoolTest {
         assertEquals(pool.queued(), 0);
     }
 
+<<<<<<< HEAD
     @PrepareForTest({Sensor.class, MetricName.class})
     @Test
     public void testCleanupMemoryAvailabilityOnMetricsException() throws Exception {
@@ -271,6 +301,8 @@ public class BufferPoolTest {
         bufferPool.allocate(1, 0);
     }
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     private static class BufferPoolAllocator implements Runnable {
         BufferPool pool;
         long maxBlockTimeMs;

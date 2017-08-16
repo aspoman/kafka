@@ -16,9 +16,13 @@
 from kafkatest.tests.kafka_test import KafkaTest
 from kafkatest.services.connect import ConnectDistributedService, ConnectRestError
 from ducktape.utils.util import wait_until
+<<<<<<< HEAD
 from ducktape.mark.resource import cluster
 from ducktape.cluster.remoteaccount import RemoteCommandError
 
+=======
+import subprocess
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import json
 import itertools
 
@@ -31,8 +35,13 @@ class ConnectRestApiTest(KafkaTest):
     FILE_SOURCE_CONNECTOR = 'org.apache.kafka.connect.file.FileStreamSourceConnector'
     FILE_SINK_CONNECTOR = 'org.apache.kafka.connect.file.FileStreamSinkConnector'
 
+<<<<<<< HEAD
     FILE_SOURCE_CONFIGS = {'name', 'connector.class', 'tasks.max', 'key.converter', 'value.converter', 'topic', 'file', 'transforms'}
     FILE_SINK_CONFIGS = {'name', 'connector.class', 'tasks.max', 'key.converter', 'value.converter', 'topics', 'file', 'transforms'}
+=======
+    FILE_SOURCE_CONFIGS = {'name', 'connector.class', 'tasks.max', 'topic', 'file'}
+    FILE_SINK_CONFIGS = {'name', 'connector.class', 'tasks.max', 'topics', 'file'}
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     INPUT_FILE = "/mnt/connect.input"
     INPUT_FILE2 = "/mnt/connect.input2"
@@ -92,11 +101,16 @@ class ConnectRestApiTest(KafkaTest):
         self.verify_config(self.FILE_SINK_CONNECTOR, self.FILE_SINK_CONFIGS, configs)
 
         self.logger.info("Creating connectors")
+<<<<<<< HEAD
         self.cc.create_connector(source_connector_config)
         self.cc.create_connector(sink_connector_config)
+=======
+        self.cc.create_connector(source_connector_config, retries=120, retry_backoff=1)
+        self.cc.create_connector(sink_connector_config, retries=120, retry_backoff=1)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         # We should see the connectors appear
-        wait_until(lambda: set(self.cc.list_connectors()) == set(["local-file-source", "local-file-sink"]),
+        wait_until(lambda: set(self.cc.list_connectors(retries=5, retry_backoff=1)) == set(["local-file-source", "local-file-sink"]),
                    timeout_sec=10, err_msg="Connectors that were just created did not appear in connector listing")
 
         # We'll only do very simple validation that the connectors and tasks really ran.
@@ -165,9 +179,9 @@ class ConnectRestApiTest(KafkaTest):
             node.account.ssh("echo -e -n " + repr(self.LONER_INPUTS) + " >> " + self.INPUT_FILE2)
         wait_until(lambda: self.validate_output(self.LONGER_INPUT_LIST), timeout_sec=120, err_msg="Data added to input file was not seen in the output file in a reasonable amount of time.")
 
-        self.cc.delete_connector("local-file-source")
-        self.cc.delete_connector("local-file-sink")
-        wait_until(lambda: len(self.cc.list_connectors()) == 0, timeout_sec=10, err_msg="Deleted connectors did not disappear from REST listing")
+        self.cc.delete_connector("local-file-source", retries=120, retry_backoff=1)
+        self.cc.delete_connector("local-file-sink", retries=120, retry_backoff=1)
+        wait_until(lambda: len(self.cc.list_connectors(retries=5, retry_backoff=1)) == 0, timeout_sec=10, err_msg="Deleted connectors did not disappear from REST listing")
 
     def validate_output(self, input):
         input_set = set(input)

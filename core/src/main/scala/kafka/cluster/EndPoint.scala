@@ -26,7 +26,11 @@ import scala.collection.Map
 
 object EndPoint {
 
+<<<<<<< HEAD
   private val uriParseExp = """^(.*)://\[?([0-9a-zA-Z\-%._:]*)\]?:(-?[0-9]+)""".r
+=======
+  private val uriParseExp = """^(.*)://\[?([0-9a-zA-Z\-%.:]*)\]?:(-?[0-9]+)""".r
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
   private[kafka] val DefaultSecurityProtocolMap: Map[ListenerName, SecurityProtocol] =
     SecurityProtocol.values.map(sp => ListenerName.forSecurityProtocol(sp) -> sp).toMap

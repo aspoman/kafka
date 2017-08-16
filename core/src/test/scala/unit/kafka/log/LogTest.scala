@@ -1070,6 +1070,7 @@ class LogTest {
     // now manually truncate off all but one message from the first segment to create a gap in the messages
     log.logSegments.head.truncateTo(1)
 
+<<<<<<< HEAD
     assertEquals("A read should now return the last message in the log", log.logEndOffset - 1,
       log.readUncommitted(1, 200, None).records.batches.iterator.next().lastOffset)
   }
@@ -1125,6 +1126,9 @@ class LogTest {
       assertTrue(fetchInfo.records.isInstanceOf[FileRecords])
       assertEquals(1, fetchInfo.records.sizeInBytes)
     }
+=======
+    assertEquals("A read should now return the last message in the log", log.logEndOffset - 1, log.read(1, 200, None).messageSet.head.offset)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 
   /**
@@ -1136,6 +1140,7 @@ class LogTest {
   @Test
   def testReadOutOfRange() {
     createEmptyLogs(logDir, 1024)
+<<<<<<< HEAD
     // set up replica log starting with offset 1024 and with one message (at offset 1024)
     val logConfig = createLogConfig(segmentBytes = 1024)
     val log = createLog(logDir, logConfig)
@@ -1153,13 +1158,37 @@ class LogTest {
 
     try {
       log.readUncommitted(1026, 1000)
+=======
+    val logProps = new Properties()
+
+    // set up replica log starting with offset 1024 and with one message (at offset 1024)
+    logProps.put(LogConfig.SegmentBytesProp, 1024: java.lang.Integer)
+    val log = new Log(logDir, LogConfig(logProps), recoveryPoint = 0L, time.scheduler, time = time)
+    log.append(new ByteBufferMessageSet(NoCompressionCodec, messages = new Message("42".getBytes)))
+
+    assertEquals("Reading at the log end offset should produce 0 byte read.", 0, log.read(1025, 1000).messageSet.sizeInBytes)
+
+    try {
+      log.read(0, 1000)
+      fail("Reading below the log start offset should throw OffsetOutOfRangeException")
+    } catch {
+      case e: OffsetOutOfRangeException => // This is good.
+    }
+
+    try {
+      log.read(1026, 1000)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
       fail("Reading at beyond the log end offset should throw OffsetOutOfRangeException")
     } catch {
       case _: OffsetOutOfRangeException => // This is good.
     }
 
+<<<<<<< HEAD
     assertEquals("Reading from below the specified maxOffset should produce 0 byte read.", 0,
       log.readUncommitted(1025, 1000, Some(1024)).records.sizeInBytes)
+=======
+    assertEquals("Reading from below the specified maxOffset should produce 0 byte read.", 0, log.read(1025, 1000, Some(1024)).messageSet.sizeInBytes)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 
   /**
@@ -2076,6 +2105,7 @@ class LogTest {
   }
 
   @Test
+<<<<<<< HEAD
   def shouldNotDeleteSizeBasedSegmentsWhenUnderRetentionSize() {
     def createRecords = TestUtils.singletonRecords("test".getBytes)
     val logConfig = createLogConfig(segmentBytes = createRecords.sizeInBytes * 5, retentionBytes = createRecords.sizeInBytes * 15)
@@ -2925,5 +2955,33 @@ class LogTest {
     cleanShutdownFile.createNewFile()
     assertTrue(".kafka_cleanshutdown must exist", cleanShutdownFile.exists())
     cleanShutdownFile
+=======
+  def testDeleteOldSegmentsMethod() {
+    val set = TestUtils.singleMessageSet("test".getBytes)
+    val logProps = new Properties()
+    logProps.put(LogConfig.SegmentBytesProp, set.sizeInBytes * 5: java.lang.Integer)
+    logProps.put(LogConfig.SegmentIndexBytesProp, 1000: java.lang.Integer)
+    val config = LogConfig(logProps)
+    val log = new Log(logDir,
+      config,
+      recoveryPoint = 0L,
+      time.scheduler,
+      time)
+
+    // append some messages to create some segments
+    for (i <- 0 until 100)
+      log.append(set)
+
+    log.deleteOldSegments(_ => true)
+    assertEquals("The deleted segments should be gone.", 1, log.numberOfSegments)
+
+    // append some messages to create some segments
+    for (i <- 0 until 100)
+      log.append(set)
+
+    log.delete()
+    assertEquals("The number of segments should be 0", 0, log.numberOfSegments)
+    assertEquals("The number of deleted segments shoud be zero.", 0, log.deleteOldSegments(_ => true))
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 }

@@ -268,6 +268,7 @@ public class VerifiableConsumer implements Closeable, OffsetCommitCallback, Cons
         public long timestamp() {
             return timestamp;
         }
+<<<<<<< HEAD
     }
 
     private static class StartupComplete extends ConsumerEvent {
@@ -276,6 +277,8 @@ public class VerifiableConsumer implements Closeable, OffsetCommitCallback, Cons
         public String name() {
             return "startup_complete";
         }
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     private static class ShutdownComplete extends ConsumerEvent {

@@ -85,6 +85,7 @@ public class ConnectorPluginsResourceTest {
     private static Map<String, String> props;
     private static Map<String, String> partialProps = new HashMap<>();
     static {
+<<<<<<< HEAD
         partialProps.put("name", "test");
         partialProps.put("test.string.config", "testString");
         partialProps.put("test.int.config", "1");
@@ -100,6 +101,16 @@ public class ConnectorPluginsResourceTest {
     private static final int ERROR_COUNT = 0;
     private static final int PARTIAL_CONFIG_ERROR_COUNT = 1;
     private static final Set<PluginDesc<Connector>> CONNECTOR_PLUGINS = new TreeSet<>();
+=======
+        props.put("name", "test");
+        props.put("test.string.config", "testString");
+        props.put("test.int.config", "1");
+        props.put("test.list.config", "a,b");
+    }
+
+    private static final ConfigInfos CONFIG_INFOS;
+    private static final int ERROR_COUNT = 1;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     static {
         List<ConfigInfo> configs = new LinkedList<>();
@@ -107,6 +118,7 @@ public class ConnectorPluginsResourceTest {
 
         ConfigDef connectorConfigDef = ConnectorConfig.configDef();
         List<ConfigValue> connectorConfigValues = connectorConfigDef.validate(props);
+<<<<<<< HEAD
         List<ConfigValue> partialConnectorConfigValues = connectorConfigDef.validate(partialProps);
         ConfigInfos result = AbstractHerder.generateResult(ConnectorPluginsResourceTestConnector.class.getName(), connectorConfigDef.configKeys(), connectorConfigValues, Collections.<String>emptyList());
         ConfigInfos partialResult = AbstractHerder.generateResult(ConnectorPluginsResourceTestConnector.class.getName(), connectorConfigDef.configKeys(), partialConnectorConfigValues, Collections.<String>emptyList());
@@ -114,6 +126,12 @@ public class ConnectorPluginsResourceTest {
         partialConfigs.addAll(partialResult.values());
 
         ConfigKeyInfo configKeyInfo = new ConfigKeyInfo("test.string.config", "STRING", true, null, "HIGH", "Test configuration for string type.", null, -1, "NONE", "test.string.config", Collections.<String>emptyList());
+=======
+        ConfigInfos result = AbstractHerder.generateResult(ConnectorPluginsResourceTestConnector.class.getName(), connectorConfigDef.configKeys(), connectorConfigValues, Collections.<String>emptyList());
+        configs.addAll(result.values());
+
+        ConfigKeyInfo configKeyInfo = new ConfigKeyInfo("test.string.config", "STRING", true, "", "HIGH", "Test configuration for string type.", null, -1, "NONE", "test.string.config", Collections.<String>emptyList());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         ConfigValueInfo configValueInfo = new ConfigValueInfo("test.string.config", "testString", Collections.<String>emptyList(), Collections.<String>emptyList(), true);
         ConfigInfo configInfo = new ConfigInfo(configKeyInfo, configValueInfo);
         configs.add(configInfo);
@@ -135,6 +153,7 @@ public class ConnectorPluginsResourceTest {
         configValueInfo = new ConfigValueInfo("test.list.config", "a,b", Arrays.asList("a", "b", "c"), Collections.<String>emptyList(), true);
         configInfo = new ConfigInfo(configKeyInfo, configValueInfo);
         configs.add(configInfo);
+<<<<<<< HEAD
         partialConfigs.add(configInfo);
 
         CONFIG_INFOS = new ConfigInfos(ConnectorPluginsResourceTestConnector.class.getName(), ERROR_COUNT, Collections.singletonList("Test"), configs);
@@ -167,6 +186,10 @@ public class ConnectorPluginsResourceTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+=======
+
+        CONFIG_INFOS = new ConfigInfos(ConnectorPluginsResourceTestConnector.class.getName(), ERROR_COUNT, Collections.singletonList("Test"), configs);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     @Mock
@@ -259,12 +282,16 @@ public class ConnectorPluginsResourceTest {
                 resultConfigKeys.putAll(connectorConfigDef.configKeys());
                 configValues.addAll(connectorConfigValues);
 
+<<<<<<< HEAD
                 return AbstractHerder.generateResult(
                     ConnectorPluginsResourceTestConnector.class.getName(),
                     resultConfigKeys,
                     configValues,
                     Collections.singletonList("Test")
                 );
+=======
+                return AbstractHerder.generateResult(ConnectorPluginsResourceTestConnector.class.getName(), resultConfigKeys, configValues, Collections.singletonList("Test"));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             }
         });
 

@@ -563,7 +563,11 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
     private final Metadata metadata;
     private final long retryBackoffMs;
     private final long requestTimeoutMs;
+<<<<<<< HEAD
     private volatile boolean closed = false;
+=======
+    private boolean closed = false;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     // currentThread holds the threadId of the current thread accessing KafkaConsumer
     // and is used to prevent multi-threaded access
@@ -652,7 +656,12 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
             if (clientId.length() <= 0)
                 clientId = "consumer-" + CONSUMER_CLIENT_ID_SEQUENCE.getAndIncrement();
             this.clientId = clientId;
+<<<<<<< HEAD
             Map<String, String> metricsTags = Collections.singletonMap("client-id", clientId);
+=======
+            Map<String, String> metricsTags = new LinkedHashMap<>();
+            metricsTags.put("client-id", clientId);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             MetricConfig metricConfig = new MetricConfig().samples(config.getInt(ConsumerConfig.METRICS_NUM_SAMPLES_CONFIG))
                     .timeWindow(config.getLong(ConsumerConfig.METRICS_SAMPLE_WINDOW_MS_CONFIG), TimeUnit.MILLISECONDS)
                     .recordLevel(Sensor.RecordingLevel.forName(config.getString(ConsumerConfig.METRICS_RECORDING_LEVEL_CONFIG)))
@@ -1048,8 +1057,14 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
                     //
                     // NOTE: since the consumed position has already been updated, we must not allow
                     // wakeups or any other errors to be triggered prior to returning the fetched records.
+<<<<<<< HEAD
                     if (fetcher.sendFetches() > 0 || client.hasPendingRequests())
                         client.pollNoWakeup();
+=======
+                    // Additionally, pollNoWakeup does not allow automatic commits to get triggered.
+                    fetcher.sendFetches();
+                    client.pollNoWakeup();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
                     if (this.interceptors == null)
                         return new ConsumerRecords<>(records);
@@ -1074,14 +1089,24 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
      * @return The fetched records (may be empty)
      */
     private Map<TopicPartition, List<ConsumerRecord<K, V>>> pollOnce(long timeout) {
+<<<<<<< HEAD
         client.maybeTriggerWakeup();
         coordinator.poll(time.milliseconds(), timeout);
+=======
+        // TODO: Sub-requests should take into account the poll timeout (KAFKA-1894)
+        coordinator.ensureCoordinatorReady();
+
+        // ensure we have partitions assigned if we expect to
+        if (subscriptions.partitionsAutoAssigned())
+            coordinator.ensurePartitionAssignment();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         // fetch positions if we have partitions we're subscribed to that we
         // don't know the offset for
         if (!subscriptions.hasAllFetchPositions())
             updateFetchPositions(this.subscriptions.missingFetchPositions());
 
+<<<<<<< HEAD
         // if data is available already, return it immediately
         Map<TopicPartition, List<ConsumerRecord<K, V>>> records = fetcher.fetchedRecords();
         if (!records.isEmpty())
@@ -1107,6 +1132,23 @@ public class KafkaConsumer<K, V> implements Consumer<K, V> {
         if (coordinator.needRejoin())
             return Collections.emptyMap();
 
+=======
+        long now = time.milliseconds();
+
+        // execute delayed tasks (e.g. autocommits and heartbeats) prior to fetching records
+        client.executeDelayedTasks(now);
+
+        // init any new fetches (won't resend pending fetches)
+        Map<TopicPartition, List<ConsumerRecord<K, V>>> records = fetcher.fetchedRecords();
+
+        // if data is available already, e.g. from a previous network client poll() call to commit,
+        // then just return it immediately
+        if (!records.isEmpty())
+            return records;
+
+        fetcher.sendFetches();
+        client.poll(timeout, now);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         return fetcher.fetchedRecords();
     }
 

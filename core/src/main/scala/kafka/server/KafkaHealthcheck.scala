@@ -38,11 +38,19 @@ import org.apache.zookeeper.Watcher.Event.KeeperState
  * we are dead.
  */
 class KafkaHealthcheck(brokerId: Int,
+<<<<<<< HEAD
                        advertisedEndpoints: Seq[EndPoint],
+=======
+                       advertisedEndpoints: Map[SecurityProtocol, EndPoint],
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                        zkUtils: ZkUtils,
                        rack: Option[String],
                        interBrokerProtocolVersion: ApiVersion) extends Logging {
 
+<<<<<<< HEAD
+=======
+  private val brokerIdPath = ZkUtils.BrokerIdsPath + "/" + brokerId
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   private[server] val sessionExpireListener = new SessionExpireListener
 
   def startup() {
@@ -92,6 +100,7 @@ class KafkaHealthcheck(brokerId: Int,
         state -> newMeter(s"ZooKeeper${eventType}PerSec", eventType.toLowerCase(Locale.ROOT), TimeUnit.SECONDS)
       }
     }
+<<<<<<< HEAD
 
     @throws[Exception]
     override def handleStateChanged(state: KeeperState) {
@@ -99,6 +108,15 @@ class KafkaHealthcheck(brokerId: Int,
     }
 
     @throws[Exception]
+=======
+
+    @throws(classOf[Exception])
+    override def handleStateChanged(state: KeeperState) {
+      stateToMeterMap.get(state).foreach(_.mark())
+    }
+
+    @throws(classOf[Exception])
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     override def handleNewSession() {
       info("re-registering broker info in ZK for broker " + brokerId)
       register()

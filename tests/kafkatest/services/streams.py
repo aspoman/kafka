@@ -22,8 +22,13 @@ from ducktape.utils.util import wait_until
 from kafkatest.directory_layout.kafka_path import KafkaPathResolverMixin
 
 
+<<<<<<< HEAD
 class StreamsTestBaseService(KafkaPathResolverMixin, Service):
     """Base class for Streams Test services providing some common settings and functionality"""
+=======
+class StreamsSmokeTestBaseService(KafkaPathResolverMixin, Service):
+    """Base class for Streams Smoke Test services providing some common settings and functionality"""
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     PERSISTENT_ROOT = "/mnt/streams"
     # The log file contains normal log4j logs written using a file appender. stdout and stderr are handled separately
@@ -121,9 +126,15 @@ class StreamsTestBaseService(KafkaPathResolverMixin, Service):
         args['kafka_run_class'] = self.path.script("kafka-run-class.sh", node)
 
         cmd = "( export KAFKA_LOG4J_OPTS=\"-Dlog4j.configuration=file:%(log4j)s\"; " \
+<<<<<<< HEAD
               "INCLUDE_TEST_JARS=true %(kafka_run_class)s %(streams_class_name)s " \
               " %(kafka)s %(state_dir)s %(user_test_args)s %(user_test_args1)s %(user_test_args2)s" \
               " %(user_test_args3)s & echo $! >&3 ) 1>> %(stdout)s 2>> %(stderr)s 3> %(pidfile)s" % args
+=======
+              "INCLUDE_TEST_JARS=true %(kafka_run_class)s org.apache.kafka.streams.smoketest.StreamsSmokeTest " \
+              " %(command)s %(kafka)s %(zk)s %(state_dir)s " \
+              " & echo $! >&3 ) 1>> %(stdout)s 2>> %(stderr)s 3> %(pidfile)s" % args
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         return cmd
 

@@ -16,6 +16,7 @@
  */
 package org.apache.kafka.common.utils;
 
+<<<<<<< HEAD
 import java.text.DecimalFormat;
 import org.apache.kafka.common.KafkaException;
 import org.slf4j.Logger;
@@ -24,6 +25,11 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.DataOutput;
 import java.io.EOFException;
+=======
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Closeable;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -61,12 +67,16 @@ public class Utils {
 
     // This matches URIs of formats: host:port and protocol:\\host:port
     // IPv6 is supported with [ip] pattern
+<<<<<<< HEAD
     private static final Pattern HOST_PORT_PATTERN = Pattern.compile(".*?\\[?([0-9a-zA-Z\\-%._:]*)\\]?:([0-9]+)");
 
     // Prints up to 2 decimal digits. Used for human readable printing
     private static final DecimalFormat TWO_DIGIT_FORMAT = new DecimalFormat("0.##");
 
     private static final String[] BYTE_SCALE_SUFFIXES = new String[] {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+=======
+    private static final Pattern HOST_PORT_PATTERN = Pattern.compile(".*?\\[?([0-9a-zA-Z\\-%.:]*)\\]?:([0-9]+)");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     public static final String NL = System.getProperty("line.separator");
 
@@ -660,8 +670,12 @@ public class Utils {
         IOException exception = null;
         for (Closeable closeable : closeables) {
             try {
+<<<<<<< HEAD
                 if (closeable != null)
                     closeable.close();
+=======
+                closeable.close();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             } catch (IOException e) {
                 if (exception != null)
                     exception.addSuppressed(e);
@@ -673,6 +687,7 @@ public class Utils {
             throw exception;
     }
 
+<<<<<<< HEAD
     /**
      * Closes {@code closeable} and if an exception is thrown, it is logged at the WARN level.
      */
@@ -834,4 +849,6 @@ public class Utils {
         return res;
     }
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 }

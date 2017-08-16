@@ -16,13 +16,22 @@
  */
 package org.apache.kafka.streams.processor.internals;
 
+<<<<<<< HEAD
+=======
+import org.apache.kafka.clients.consumer.MockConsumer;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.clients.consumer.internals.PartitionAssignor;
 import org.apache.kafka.common.Cluster;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+<<<<<<< HEAD
 import org.apache.kafka.common.config.ConfigException;
+=======
+import org.apache.kafka.common.metrics.Metrics;
+import org.apache.kafka.common.utils.SystemTime;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.common.utils.Utils;
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -37,9 +46,13 @@ import org.apache.kafka.streams.processor.PartitionGrouper;
 import org.apache.kafka.streams.processor.TaskId;
 import org.apache.kafka.streams.processor.internals.assignment.AssignmentInfo;
 import org.apache.kafka.streams.processor.internals.assignment.SubscriptionInfo;
+<<<<<<< HEAD
 import org.apache.kafka.streams.state.HostInfo;
 import org.apache.kafka.test.MockClientSupplier;
 import org.apache.kafka.test.MockInternalTopicManager;
+=======
+import org.apache.kafka.test.MockClientSupplier;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.test.MockProcessorSupplier;
 import org.apache.kafka.test.MockStateStoreSupplier;
 import org.apache.kafka.test.MockTimestampExtractor;
@@ -124,6 +137,7 @@ public class StreamPartitionAssignorTest {
         };
     }
 
+<<<<<<< HEAD
     private void configurePartitionAssignor(final int standbyReplicas, final String endPoint) {
         configurationMap.put(StreamsConfig.InternalConfig.STREAM_THREAD_INSTANCE, threadDataProvider);
         configurationMap.put(StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, standbyReplicas);
@@ -151,6 +165,16 @@ public class StreamPartitionAssignorTest {
     public void testSubscription() throws Exception {
         builder.addSource(null, "source1", null, null, null, "topic1");
         builder.addSource(null, "source2", null, null, null, "topic2");
+=======
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testSubscription() throws Exception {
+        StreamsConfig config = new StreamsConfig(configProps());
+
+        TopologyBuilder builder = new TopologyBuilder();
+        builder.addSource("source1", "topic1");
+        builder.addSource("source2", "topic2");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         builder.addProcessor("processor", new MockProcessorSupplier(), "source1", "source2");
 
         final Set<TaskId> prevTasks = Utils.mkSet(
@@ -159,8 +183,26 @@ public class StreamPartitionAssignorTest {
                 new TaskId(0, 1), new TaskId(1, 1), new TaskId(2, 1),
                 new TaskId(0, 2), new TaskId(1, 2), new TaskId(2, 2));
 
+<<<<<<< HEAD
         final UUID processId = UUID.randomUUID();
         mockThreadDataProvider(prevTasks, cachedTasks, processId, stubPartitionGrouper, builder);
+=======
+        String clientId = "client-id";
+        UUID processId = UUID.randomUUID();
+        StreamThread thread = new StreamThread(builder, config, new MockClientSupplier(), "test", clientId, processId, new Metrics(), new SystemTime()) {
+            @Override
+            public Set<TaskId> prevTasks() {
+                return prevTasks;
+            }
+            @Override
+            public Set<TaskId> cachedTasks() {
+                return cachedTasks;
+            }
+        };
+
+        StreamPartitionAssignor partitionAssignor = new StreamPartitionAssignor();
+        partitionAssignor.configure(config.getConsumerConfigs(thread, "test", clientId));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         configurePartitionAssignor(0, null);
         PartitionAssignor.Subscription subscription = partitionAssignor.subscription(Utils.mkSet("topic1", "topic2"));
@@ -178,8 +220,16 @@ public class StreamPartitionAssignorTest {
 
     @Test
     public void testAssignBasic() throws Exception {
+<<<<<<< HEAD
         builder.addSource(null, "source1", null, null, null, "topic1");
         builder.addSource(null, "source2", null, null, null, "topic2");
+=======
+        StreamsConfig config = new StreamsConfig(configProps());
+
+        TopologyBuilder builder = new TopologyBuilder();
+        builder.addSource("source1", "topic1");
+        builder.addSource("source2", "topic2");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         builder.addProcessor("processor", new MockProcessorSupplier(), "source1", "source2");
         List<String> topics = Utils.mkList("topic1", "topic2");
         Set<TaskId> allTasks = Utils.mkSet(task0, task1, task2);
@@ -193,9 +243,15 @@ public class StreamPartitionAssignorTest {
 
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
+<<<<<<< HEAD
 
         mockThreadDataProvider(prevTasks10, standbyTasks10, uuid1, stubPartitionGrouper, builder);
         configurePartitionAssignor(0, null);
+=======
+        String client1 = "client1";
+
+        StreamThread thread10 = new StreamThread(builder, config, new MockClientSupplier(), "test", client1, uuid1, new Metrics(), new SystemTime());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         partitionAssignor.setInternalTopicManager(new MockInternalTopicManager(config, mockClientSupplier.restoreConsumer));
 
@@ -317,6 +373,7 @@ public class StreamPartitionAssignorTest {
         assertEquals(0, allActiveTasks.size());
         assertEquals(Collections.<TaskId>emptySet(), new HashSet<>(allActiveTasks));
 
+<<<<<<< HEAD
         // then metadata gets populated
         assignments = partitionAssignor.assign(metadata, subscriptions);
         // check assigned partitions
@@ -339,6 +396,12 @@ public class StreamPartitionAssignorTest {
         builder.addSource(null, "source1", null, null, null, "topic1");
         builder.addSource(null, "source2", null, null, null, "topic2");
         builder.addSource(null, "source3", null, null, null, "topic3");
+=======
+        TopologyBuilder builder = new TopologyBuilder();
+        builder.addSource("source1", "topic1");
+        builder.addSource("source2", "topic2");
+        builder.addSource("source3", "topic3");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         builder.addProcessor("processor", new MockProcessorSupplier(), "source1", "source2", "source3");
         List<String> topics = Utils.mkList("topic1", "topic2", "topic3");
         Set<TaskId> allTasks = Utils.mkSet(task0, task1, task2, task3);
@@ -350,9 +413,18 @@ public class StreamPartitionAssignorTest {
 
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
+<<<<<<< HEAD
         mockThreadDataProvider(prevTasks10, Collections.<TaskId>emptySet(), uuid1, stubPartitionGrouper, builder);
         configurePartitionAssignor(0, null);
         partitionAssignor.setInternalTopicManager(new MockInternalTopicManager(config, mockClientSupplier.restoreConsumer));
+=======
+        String client1 = "client1";
+
+        StreamThread thread10 = new StreamThread(builder, config, new MockClientSupplier(), "test", client1, uuid1, new Metrics(), new SystemTime());
+
+        StreamPartitionAssignor partitionAssignor = new StreamPartitionAssignor();
+        partitionAssignor.configure(config.getConsumerConfigs(thread10, "test", client1));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         Map<String, PartitionAssignor.Subscription> subscriptions = new HashMap<>();
         subscriptions.put("consumer10",
@@ -389,10 +461,19 @@ public class StreamPartitionAssignorTest {
 
     @Test
     public void testAssignWithStates() throws Exception {
+<<<<<<< HEAD
         String applicationId = "test";
         builder.setApplicationId(applicationId);
         builder.addSource(null, "source1", null, null, null, "topic1");
         builder.addSource(null, "source2", null, null, null, "topic2");
+=======
+        StreamsConfig config = new StreamsConfig(configProps());
+
+        TopologyBuilder builder = new TopologyBuilder();
+
+        builder.addSource("source1", "topic1");
+        builder.addSource("source2", "topic2");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         builder.addProcessor("processor-1", new MockProcessorSupplier(), "source1");
         builder.addStateStore(new MockStateStoreSupplier("store1", false), "processor-1");
@@ -413,12 +494,18 @@ public class StreamPartitionAssignorTest {
 
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
+<<<<<<< HEAD
 
         mockThreadDataProvider(Collections.<TaskId>emptySet(),
                                Collections.<TaskId>emptySet(),
                                uuid1,
                                defaultPartitionGrouper, builder);
         configurePartitionAssignor(0, null);
+=======
+        String client1 = "client1";
+
+        StreamThread thread10 = new StreamThread(builder, config, new MockClientSupplier(), "test", client1, uuid1, new Metrics(), new SystemTime());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         partitionAssignor.setInternalTopicManager(new MockInternalTopicManager(config, mockClientSupplier.restoreConsumer));
 
@@ -482,8 +569,14 @@ public class StreamPartitionAssignorTest {
         props.setProperty(StreamsConfig.NUM_STANDBY_REPLICAS_CONFIG, "1");
         StreamsConfig config = new StreamsConfig(props);
 
+<<<<<<< HEAD
         builder.addSource(null, "source1", null, null, null, "topic1");
         builder.addSource(null, "source2", null, null, null, "topic2");
+=======
+        TopologyBuilder builder = new TopologyBuilder();
+        builder.addSource("source1", "topic1");
+        builder.addSource("source2", "topic2");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         builder.addProcessor("processor", new MockProcessorSupplier(), "source1", "source2");
         List<String> topics = Utils.mkList("topic1", "topic2");
         Set<TaskId> allTasks = Utils.mkSet(task0, task1, task2);
@@ -498,8 +591,14 @@ public class StreamPartitionAssignorTest {
 
         UUID uuid1 = UUID.randomUUID();
         UUID uuid2 = UUID.randomUUID();
+<<<<<<< HEAD
 
         mockThreadDataProvider(prevTasks00, standbyTasks01, uuid1, defaultPartitionGrouper, builder);
+=======
+        String client1 = "client1";
+
+        StreamThread thread10 = new StreamThread(builder, config, new MockClientSupplier(), "test", client1, uuid1, new Metrics(), new SystemTime());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         configurePartitionAssignor(1, null);
         partitionAssignor.setInternalTopicManager(new MockInternalTopicManager(config, mockClientSupplier.restoreConsumer));
@@ -549,6 +648,11 @@ public class StreamPartitionAssignorTest {
 
     @Test
     public void testOnAssignment() throws Exception {
+<<<<<<< HEAD
+=======
+        StreamsConfig config = new StreamsConfig(configProps());
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         TopicPartition t2p3 = new TopicPartition("topic2", 3);
 
         builder.addSource(null, "source1", null, null, null, "topic1");
@@ -556,8 +660,17 @@ public class StreamPartitionAssignorTest {
         builder.addProcessor("processor", new MockProcessorSupplier(), "source1", "source2");
 
         UUID uuid = UUID.randomUUID();
+<<<<<<< HEAD
         mockThreadDataProvider(Collections.<TaskId>emptySet(), Collections.<TaskId>emptySet(), uuid, defaultPartitionGrouper, builder);
         configurePartitionAssignor(0, null);
+=======
+        String client1 = "client1";
+
+        StreamThread thread = new StreamThread(builder, config, new MockClientSupplier(), "test", client1, uuid, new Metrics(), new SystemTime());
+
+        StreamPartitionAssignor partitionAssignor = new StreamPartitionAssignor();
+        partitionAssignor.configure(config.getConsumerConfigs(thread, "test", client1));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         List<TaskId> activeTaskList = Utils.mkList(task0, task3);
         Map<TaskId, Set<TopicPartition>> activeTasks = new HashMap<>();
@@ -577,8 +690,14 @@ public class StreamPartitionAssignorTest {
 
     @Test
     public void testAssignWithInternalTopics() throws Exception {
+<<<<<<< HEAD
         String applicationId = "test";
         builder.setApplicationId(applicationId);
+=======
+        StreamsConfig config = new StreamsConfig(configProps());
+
+        TopologyBuilder builder = new TopologyBuilder();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         builder.addInternalTopic("topicX");
         builder.addSource(null, "source1", null, null, null, "topic1");
         builder.addProcessor("processor1", new MockProcessorSupplier(), "source1");
@@ -589,9 +708,20 @@ public class StreamPartitionAssignorTest {
         Set<TaskId> allTasks = Utils.mkSet(task0, task1, task2);
 
         UUID uuid1 = UUID.randomUUID();
+<<<<<<< HEAD
         mockThreadDataProvider(Collections.<TaskId>emptySet(), Collections.<TaskId>emptySet(), uuid1, defaultPartitionGrouper, builder);
         configurePartitionAssignor(0, null);
         MockInternalTopicManager internalTopicManager = new MockInternalTopicManager(config, mockClientSupplier.restoreConsumer);
+=======
+        String client1 = "client1";
+
+        MockClientSupplier clientSupplier = new MockClientSupplier();
+        StreamThread thread10 = new StreamThread(builder, config, clientSupplier, "test", client1, uuid1, new Metrics(), new SystemTime());
+
+        StreamPartitionAssignor partitionAssignor = new StreamPartitionAssignor();
+        partitionAssignor.configure(config.getConsumerConfigs(thread10, "test", client1));
+        MockInternalTopicManager internalTopicManager = new MockInternalTopicManager(clientSupplier.restoreConsumer);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         partitionAssignor.setInternalTopicManager(internalTopicManager);
 
         Map<String, PartitionAssignor.Subscription> subscriptions = new HashMap<>();

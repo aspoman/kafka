@@ -33,7 +33,15 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Collections;
+<<<<<<< HEAD
 import java.util.Random;
+=======
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
+import org.junit.Test;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 import static org.apache.kafka.common.utils.Utils.formatAddress;
 import static org.apache.kafka.common.utils.Utils.formatBytes;
@@ -41,7 +49,10 @@ import static org.apache.kafka.common.utils.Utils.getHost;
 import static org.apache.kafka.common.utils.Utils.getPort;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+<<<<<<< HEAD
 import static org.junit.Assert.assertFalse;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -272,6 +283,7 @@ public class UtilsTest {
         }
     }
 
+<<<<<<< HEAD
     @Test
     public void testReadFullyOrFailWithRealFile() throws IOException {
         try (FileChannel channel = FileChannel.open(TestUtils.tempFile().toPath(), StandardOpenOption.READ, StandardOpenOption.WRITE)) {
@@ -401,6 +413,8 @@ public class UtilsTest {
         }
     }
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     private static class TestCloseable implements Closeable {
         private final int id;
         private final IOException closeException;
@@ -438,6 +452,7 @@ public class UtilsTest {
                 assertEquals(closeablesWithException[i].closeException, suppressed[i - 1]);
         }
     }
+<<<<<<< HEAD
 
     @Test(timeout = 120000)
     public void testRecursiveDelete() throws IOException {
@@ -461,4 +476,6 @@ public class UtilsTest {
         Utils.delete(tempDir);
         assertFalse(Files.exists(tempDir.toPath()));
     }
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 }

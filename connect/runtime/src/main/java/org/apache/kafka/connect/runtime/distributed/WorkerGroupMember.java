@@ -137,13 +137,31 @@ public class WorkerGroupMember {
     }
 
     public void ensureActive() {
+<<<<<<< HEAD
         coordinator.poll(0);
+=======
+        coordinator.ensureCoordinatorReady();
+        coordinator.ensureActiveGroup();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     public void poll(long timeout) {
         if (timeout < 0)
             throw new IllegalArgumentException("Timeout must not be negative");
+<<<<<<< HEAD
         coordinator.poll(timeout);
+=======
+
+        // poll for new data until the timeout expires
+        long remaining = timeout;
+        while (remaining >= 0) {
+            long start = time.milliseconds();
+            coordinator.ensureCoordinatorReady();
+            coordinator.ensureActiveGroup();
+            client.poll(remaining);
+            remaining -= time.milliseconds() - start;
+        }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /**

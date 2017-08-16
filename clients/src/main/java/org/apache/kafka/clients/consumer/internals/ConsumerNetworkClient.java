@@ -45,9 +45,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+<<<<<<< HEAD
  * Higher level consumer access to the network layer with basic support for request futures. This class
  * is thread-safe, but provides no synchronization for response callbacks. This guarantees that no locks
  * are held when they are invoked.
+=======
+ * Higher level consumer access to the network layer with basic support for futures and
+ * task scheduling. This class is not thread-safe, except for wakeup().
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
  */
 public class ConsumerNetworkClient implements Closeable {
     private static final Logger log = LoggerFactory.getLogger(ConsumerNetworkClient.class);
@@ -61,6 +66,7 @@ public class ConsumerNetworkClient implements Closeable {
     private final Time time;
     private final long retryBackoffMs;
     private final long unsentExpiryMs;
+<<<<<<< HEAD
     private final AtomicBoolean wakeupDisabled = new AtomicBoolean();
 
     // when requests complete, they are transferred to this queue prior to invocation. The purpose
@@ -70,6 +76,12 @@ public class ConsumerNetworkClient implements Closeable {
     // this flag allows the client to be safely woken up without waiting on the lock above. It is
     // atomic to avoid the need to acquire the lock above in order to enable it concurrently.
     private final AtomicBoolean wakeup = new AtomicBoolean(false);
+=======
+
+    // this count is only accessed from the consumer's main thread
+    private int wakeupDisabledCount = 0;
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     public ConsumerNetworkClient(KafkaClient client,
                                  Metadata metadata,
@@ -203,9 +215,28 @@ public class ConsumerNetworkClient implements Closeable {
      * Poll for any network IO.
      * @param timeout timeout in milliseconds
      * @param now current time in milliseconds
+<<<<<<< HEAD
      */
     public void poll(long timeout, long now, PollCondition pollCondition) {
         poll(timeout, now, pollCondition, false);
+=======
+     */
+    public void poll(long timeout, long now) {
+        poll(timeout, now, true);
+    }
+
+    /**
+     * Poll for network IO and return immediately. This will not trigger wakeups,
+     * nor will it execute any delayed tasks.
+     */
+    public void pollNoWakeup() {
+        disableWakeups();
+        try {
+            poll(0, time.milliseconds(), false);
+        } finally {
+            enableWakeups();
+        }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /**
@@ -268,6 +299,16 @@ public class ConsumerNetworkClient implements Closeable {
      */
     public void pollNoWakeup() {
         poll(0, time.milliseconds(), null, true);
+    }
+
+    /**
+     * Execute delayed tasks now.
+     * @param now current time in milliseconds
+     * @throws WakeupException if a wakeup has been requested
+     */
+    public void executeDelayedTasks(long now) {
+        delayedTasks.poll(now);
+        maybeTriggerWakeup();
     }
 
     /**
@@ -415,14 +456,25 @@ public class ConsumerNetworkClient implements Closeable {
         return requestsSent;
     }
 
+<<<<<<< HEAD
     public void maybeTriggerWakeup() {
         if (!wakeupDisabled.get() && wakeup.get()) {
             log.trace("Raising wakeup exception in response to user wakeup");
+=======
+    private void clientPoll(long timeout, long now) {
+        client.poll(timeout, now);
+        maybeTriggerWakeup();
+    }
+
+    private void maybeTriggerWakeup() {
+        if (wakeupDisabledCount == 0 && wakeup.get()) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             wakeup.set(false);
             throw new WakeupException();
         }
     }
 
+<<<<<<< HEAD
     private void maybeThrowInterruptException() {
         if (Thread.interrupted()) {
             throw new InterruptException(new InterruptedException());
@@ -431,6 +483,22 @@ public class ConsumerNetworkClient implements Closeable {
 
     public void disableWakeups() {
         wakeupDisabled.set(true);
+=======
+    public void disableWakeups() {
+        wakeupDisabledCount++;
+    }
+
+    public void enableWakeups() {
+        if (wakeupDisabledCount <= 0)
+            throw new IllegalStateException("Cannot enable wakeups since they were never disabled");
+
+        wakeupDisabledCount--;
+
+        // re-wakeup the client if the flag was set since previous wake-up call
+        // could be cleared by poll(0) while wakeups were disabled
+        if (wakeupDisabledCount == 0 && wakeup.get())
+            this.client.wakeup();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     @Override

@@ -25,8 +25,11 @@ import java.nio.channels.SelectionKey;
 
 import java.security.Principal;
 
+<<<<<<< HEAD
 import java.util.Objects;
 import org.apache.kafka.common.memory.MemoryPool;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.common.utils.Utils;
 
 public class KafkaChannel {
@@ -59,8 +62,12 @@ public class KafkaChannel {
     }
 
     public void close() throws IOException {
+<<<<<<< HEAD
         this.disconnected = true;
         Utils.closeAll(transportLayer, authenticator, receive);
+=======
+        Utils.closeAll(transportLayer, authenticator);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /**

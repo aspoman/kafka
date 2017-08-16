@@ -49,14 +49,28 @@ class ZKPathTest extends ZooKeeperTestHarness {
   def testCreatePersistentPath(): Unit = {
     val config = new ConsumerConfig(TestUtils.createConsumerProperties(zkConnect, "test", "1"))
     val zkUtils = ZkUtils(zkConnect, zkSessionTimeoutMs, config.zkConnectionTimeoutMs, false)
+<<<<<<< HEAD
     zkUtils.zkPath.resetNamespaceCheckedState
     zkUtils.createPersistentPath(path)
+=======
+    try {
+      ZkPath.resetNamespaceCheckedState
+      zkUtils.createPersistentPath(path)
+    } catch {
+      case exception: Throwable => fail("Failed to create persistent path")
+    }
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     assertTrue("Failed to create persistent path", zkUtils.pathExists(path))
     zkUtils.close()
   }
 
   @Test
+<<<<<<< HEAD
   def testMakeSurePersistsPathExistsThrowsException(): Unit = {
+=======
+  def testMakeSurePersistsPathExistsThrowsException {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     val config = new ConsumerConfig(TestUtils.createConsumerProperties(zkConnectWithInvalidRoot, "test", "1"))
     val zkUtils = ZkUtils(zkConnectWithInvalidRoot, zkSessionTimeoutMs, config.zkConnectionTimeoutMs, false)
     try {
@@ -73,14 +87,28 @@ class ZKPathTest extends ZooKeeperTestHarness {
   def testMakeSurePersistsPathExists(): Unit = {
     val config = new ConsumerConfig(TestUtils.createConsumerProperties(zkConnect, "test", "1"))
     val zkUtils = ZkUtils(zkConnect, zkSessionTimeoutMs, config.zkConnectionTimeoutMs, false)
+<<<<<<< HEAD
     zkUtils.zkPath.resetNamespaceCheckedState
     zkUtils.makeSurePersistentPathExists(path)
+=======
+    try {
+      ZkPath.resetNamespaceCheckedState
+      zkUtils.makeSurePersistentPathExists(path)
+    } catch {
+      case exception: Throwable => fail("Failed to create persistent path")
+    }
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     assertTrue("Failed to create persistent path", zkUtils.pathExists(path))
     zkUtils.close()
   }
 
   @Test
+<<<<<<< HEAD
   def testCreateEphemeralPathThrowsException(): Unit = {
+=======
+  def testCreateEphemeralPathThrowsException {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     val config = new ConsumerConfig(TestUtils.createConsumerProperties(zkConnectWithInvalidRoot, "test", "1"))
     val zkUtils = ZkUtils(zkConnectWithInvalidRoot, zkSessionTimeoutMs, config.zkConnectionTimeoutMs, false)
     try {
@@ -97,8 +125,18 @@ class ZKPathTest extends ZooKeeperTestHarness {
   def testCreateEphemeralPathExists(): Unit = {
     val config = new ConsumerConfig(TestUtils.createConsumerProperties(zkConnect, "test", "1"))
     val zkUtils = ZkUtils(zkConnect, zkSessionTimeoutMs, config.zkConnectionTimeoutMs, false)
+<<<<<<< HEAD
     zkUtils.zkPath.resetNamespaceCheckedState
     zkUtils.createEphemeralPathExpectConflict(path, "somedata")
+=======
+    try {
+      ZkPath.resetNamespaceCheckedState
+      zkUtils.createEphemeralPathExpectConflict(path, "somedata")
+    } catch {
+      case exception: Throwable => fail("Failed to create ephemeral path")
+    }
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     assertTrue("Failed to create ephemeral path", zkUtils.pathExists(path))
     zkUtils.close()
   }
@@ -122,8 +160,20 @@ class ZKPathTest extends ZooKeeperTestHarness {
   def testCreatePersistentSequentialExists(): Unit = {
     val config = new ConsumerConfig(TestUtils.createConsumerProperties(zkConnect, "test", "1"))
     val zkUtils = ZkUtils(zkConnect, zkSessionTimeoutMs, config.zkConnectionTimeoutMs, false)
+<<<<<<< HEAD
     zkUtils.zkPath.resetNamespaceCheckedState
     val actualPath = zkUtils.createSequentialPersistentPath(path)
+=======
+
+    var actualPath: String = ""
+    try {
+      ZkPath.resetNamespaceCheckedState
+      actualPath = zkUtils.createSequentialPersistentPath(path)
+    } catch {
+      case exception: Throwable => fail("Failed to create persistent path")
+    }
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     assertTrue("Failed to create persistent path", zkUtils.pathExists(actualPath))
     zkUtils.close()
   }

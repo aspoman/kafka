@@ -771,6 +771,7 @@ class KafkaApis(val requestChannel: RequestChannel,
     }
   }
 
+<<<<<<< HEAD
   private def fetchOffsetForTimestamp(topicPartition: TopicPartition, timestamp: Long): Option[TimestampOffset] = {
     replicaManager.getLog(topicPartition) match {
       case Some(log) =>
@@ -796,6 +797,21 @@ class KafkaApis(val requestChannel: RequestChannel,
       offsetTimeArray(i) = (math.max(segments(i).baseOffset, log.logStartOffset), segments(i).lastModified)
     if (lastSegmentHasSize)
       offsetTimeArray(segments.length) = (log.logEndOffset, time.milliseconds)
+=======
+  private[server] def fetchOffsetsBefore(log: Log, timestamp: Long, maxNumOffsets: Int): Seq[Long] = {
+    val segsArray = log.logSegments.toArray
+    var offsetTimeArray: Array[(Long, Long)] = null
+    val lastSegmentHasSize = segsArray.last.size > 0
+    if (lastSegmentHasSize)
+      offsetTimeArray = new Array[(Long, Long)](segsArray.length + 1)
+    else
+      offsetTimeArray = new Array[(Long, Long)](segsArray.length)
+
+    for (i <- 0 until segsArray.length)
+      offsetTimeArray(i) = (segsArray(i).baseOffset, segsArray(i).lastModified)
+    if (lastSegmentHasSize)
+      offsetTimeArray(segsArray.length) = (log.logEndOffset, SystemTime.milliseconds)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     var startIndex = -1
     timestamp match {
@@ -1274,6 +1290,7 @@ class KafkaApis(val requestChannel: RequestChannel,
     // If this is considered to leak information about the broker version a workaround is to use SSL
     // with client authentication which is performed at an earlier stage of the connection where the
     // ApiVersionRequest is not available.
+<<<<<<< HEAD
     def sendResponseCallback(requestThrottleMs: Int) {
       val responseSend =
         if (Protocol.apiVersionSupported(ApiKeys.API_VERSIONS.id, request.header.apiVersion))
@@ -1895,6 +1912,11 @@ class KafkaApis(val requestChannel: RequestChannel,
       sendResponseMaybeThrottle(request, request.header.clientId, { requestThrottleMs =>
         requestChannel.sendResponse(createResponse(requestThrottleMs))
       })
+=======
+    val responseHeader = new ResponseHeader(request.header.correlationId)
+    val responseBody = if (Protocol.apiVersionSupported(ApiKeys.API_VERSIONS.id, request.header.apiVersion))
+      ApiVersionsResponse.apiVersionsResponse
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     else
       sendResponseExemptThrottle(createResponse(0))
   }
@@ -1958,6 +1980,7 @@ class KafkaApis(val requestChannel: RequestChannel,
     if (!authorize(request.session, ClusterAction, Resource.ClusterResource))
       throw new ClusterAuthorizationException(s"Request $request is not authorized.")
   }
+<<<<<<< HEAD
 
   def authorizeClusterAlter(request: RequestChannel.Request): Unit = {
     if (!authorize(request.session, Alter, Resource.ClusterResource))
@@ -1999,4 +2022,6 @@ class KafkaApis(val requestChannel: RequestChannel,
   private def sendResponse(request: RequestChannel.Request, response: AbstractResponse) {
     requestChannel.sendResponse(RequestChannel.Response(request, response))
   }
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 }

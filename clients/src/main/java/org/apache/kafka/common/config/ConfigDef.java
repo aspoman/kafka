@@ -835,7 +835,11 @@ public class ConfigDef {
 
         public void ensureValid(String name, Object o) {
             if (o == null)
+<<<<<<< HEAD
                 throw new ConfigException(name, null, "Value must be non-null");
+=======
+                throw new ConfigException(name, o, "Value must be non-null");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             Number n = (Number) o;
             if (min != null && n.doubleValue() < min.doubleValue())
                 throw new ConfigException(name, o, "Value must be at least " + min);

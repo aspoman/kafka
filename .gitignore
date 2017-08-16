@@ -41,7 +41,10 @@ results
 tests/results
 .ducktape
 tests/.ducktape
+<<<<<<< HEAD
 tests/venv
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 .cache
 
 docs/generated/

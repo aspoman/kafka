@@ -26,6 +26,7 @@ import java.util.Map;
  */
 public class Serdes {
 
+<<<<<<< HEAD
     static protected class WrapperSerde<T> implements Serde<T> {
         final private Serializer<T> serializer;
         final private Deserializer<T> deserializer;
@@ -55,9 +56,36 @@ public class Serdes {
         @Override
         public Deserializer<T> deserializer() {
             return deserializer;
+=======
+    static private class WrapperSerde<T> implements Serde<T> {
+        final private Serializer<T> serializer;
+        final private Deserializer<T> deserializer;
+
+        public WrapperSerde(Serializer<T> serializer, Deserializer<T> deserializer) {
+            this.serializer = serializer;
+            this.deserializer = deserializer;
+        }
+
+        @Override
+        public void configure(Map<String, ?> configs, boolean isKey) {
+            serializer.configure(configs, isKey);
+            deserializer.configure(configs, isKey);
+        }
+
+        @Override
+        public void close() {
+            serializer.close();
+            deserializer.close();
+        }
+
+        @Override
+        public Serializer<T> serializer() {
+            return serializer;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
     }
 
+<<<<<<< HEAD
     static public final class LongSerde extends WrapperSerde<Long> {
         public LongSerde() {
             super(new LongSerializer(), new LongDeserializer());
@@ -79,6 +107,23 @@ public class Serdes {
     static public final class FloatSerde extends WrapperSerde<Float> {
         public FloatSerde() {
             super(new FloatSerializer(), new FloatDeserializer());
+=======
+        @Override
+        public Deserializer<T> deserializer() {
+            return deserializer;
+        }
+    }
+
+    static public final class LongSerde extends WrapperSerde<Long> {
+        public LongSerde() {
+            super(new LongSerializer(), new LongDeserializer());
+        }
+    }
+
+    static public final class IntegerSerde extends WrapperSerde<Integer> {
+        public IntegerSerde() {
+            super(new IntegerSerializer(), new IntegerDeserializer());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
     }
 

@@ -417,6 +417,26 @@ class ControllerBrokerRequestBatch(controller: KafkaController) extends  Logging
           (r: AbstractResponse) => controller.eventManager.put(controller.LeaderAndIsrResponseReceived(r, broker)))
       }
       leaderAndIsrRequestMap.clear()
+<<<<<<< HEAD
+=======
+      updateMetadataRequestMap.foreach { case (broker, partitionStateInfos) =>
+
+        partitionStateInfos.foreach(p => stateChangeLogger.trace(("Controller %d epoch %d sending UpdateMetadata request %s " +
+          "to broker %d for partition %s").format(controllerId, controllerEpoch, p._2.leaderIsrAndControllerEpoch,
+          broker, p._1)))
+        val partitionStates = partitionStateInfos.map { case (topicPartition, partitionStateInfo) =>
+          val LeaderIsrAndControllerEpoch(leaderIsr, controllerEpoch) = partitionStateInfo.leaderIsrAndControllerEpoch
+          val partitionState = new UpdateMetadataRequest.PartitionState(controllerEpoch, leaderIsr.leader,
+            leaderIsr.leaderEpoch, leaderIsr.isr.map(Integer.valueOf).asJava, leaderIsr.zkVersion,
+            partitionStateInfo.allReplicas.map(Integer.valueOf).asJava
+          )
+          topicPartition -> partitionState
+        }
+
+        val version = if (controller.config.interBrokerProtocolVersion >= KAFKA_0_10_0_IV1) 2: Short
+                      else if (controller.config.interBrokerProtocolVersion >= KAFKA_0_9_0) 1: Short
+                      else 0: Short
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
       updateMetadataRequestPartitionInfoMap.foreach(p => stateChangeLogger.trace(("Controller %d epoch %d sending UpdateMetadata request %s " +
         "to brokers %s for partition %s").format(controllerId, controllerEpoch, p._2,

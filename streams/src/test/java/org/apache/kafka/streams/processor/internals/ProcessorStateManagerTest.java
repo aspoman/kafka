@@ -17,14 +17,26 @@
 package org.apache.kafka.streams.processor.internals;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+<<<<<<< HEAD
+=======
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.MockConsumer;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
+import org.apache.kafka.common.Node;
+import org.apache.kafka.common.PartitionInfo;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.utils.MockTime;
 import org.apache.kafka.common.utils.Utils;
+<<<<<<< HEAD
 import org.apache.kafka.streams.KeyValue;
 import org.apache.kafka.streams.errors.LockException;
 import org.apache.kafka.streams.errors.ProcessorStateException;
 import org.apache.kafka.streams.processor.TaskId;
+=======
+import org.apache.kafka.streams.errors.StreamsException;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.streams.state.internals.OffsetCheckpoint;
 import org.apache.kafka.test.MockBatchingStateRestoreListener;
 import org.apache.kafka.test.MockChangelogReader;
@@ -260,8 +272,31 @@ public class ProcessorStateManagerTest {
         try {
             stateMgr.register(mockStateStore, true, mockStateStore.stateRestoreCallback);
 
+<<<<<<< HEAD
             assertNull(stateMgr.getStore("noSuchStore"));
             assertEquals(mockStateStore, stateMgr.getStore(nonPersistentStoreName));
+=======
+            // now, this should get the lock
+            lock = ProcessorStateManager.lockStateDirectory(baseDir);
+            try {
+                assertNotNull(lock);
+            } finally {
+                if (lock != null) {
+                    lock.release();
+                    lock.channel().close();
+                }
+            }
+        } finally {
+            Utils.delete(baseDir);
+        }
+    }
+
+    @Test(expected = StreamsException.class)
+    public void testNoTopic() throws IOException {
+        File baseDir = Files.createTempDirectory(stateDir).toFile();
+        try {
+            MockStateStoreSupplier.MockStateStore mockStateStore = new MockStateStoreSupplier.MockStateStore(nonPersistentStoreName, false);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         } finally {
             stateMgr.close(Collections.<TopicPartition, Long>emptyMap());

@@ -20,6 +20,7 @@ from ducktape.mark import matrix, parametrize
 from ducktape.cluster.remoteaccount import RemoteCommandError
 
 from kafkatest.services.zookeeper import ZookeeperService
+<<<<<<< HEAD
 from kafkatest.services.kafka import KafkaService, config_property
 from kafkatest.services.connect import ConnectDistributedService, VerifiableSource, VerifiableSink, ConnectRestError, MockSink, MockSource
 from kafkatest.services.console_consumer import ConsoleConsumer
@@ -31,6 +32,17 @@ import itertools
 import json
 import operator
 import time
+=======
+from kafkatest.services.kafka import KafkaService
+from kafkatest.services.connect import ConnectDistributedService, VerifiableSource, VerifiableSink, ConnectRestError
+from kafkatest.services.console_consumer import ConsoleConsumer
+from kafkatest.services.security.security_config import SecurityConfig
+from ducktape.utils.util import wait_until
+from ducktape.mark import matrix
+import subprocess, itertools, time
+from collections import Counter
+import operator
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 class ConnectDistributedTest(Test):
     """
@@ -103,6 +115,7 @@ class ConnectDistributedTest(Test):
         except ConnectRestError:
             return None
 
+<<<<<<< HEAD
     def _connector_has_state(self, status, state):
         return status is not None and status['connector']['state'] == state
 
@@ -120,6 +133,11 @@ class ConnectDistributedTest(Test):
 
         return False
 
+=======
+    def _has_state(self, status, state):
+        return status is not None and status['connector']['state'] == state
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     def _all_tasks_have_state(self, status, task_count, state):
         if status is None:
             return False
@@ -132,6 +150,7 @@ class ConnectDistributedTest(Test):
 
     def is_running(self, connector, node=None):
         status = self._connector_status(connector.name, node)
+<<<<<<< HEAD
         return self._connector_has_state(status, 'RUNNING') and self._all_tasks_have_state(status, connector.tasks, 'RUNNING')
 
     def is_paused(self, connector, node=None):
@@ -196,6 +215,14 @@ class ConnectDistributedTest(Test):
                    err_msg="Failed to see task transition to the RUNNING state")
 
     @cluster(num_nodes=5)
+=======
+        return self._has_state(status, 'RUNNING') and self._all_tasks_have_state(status, connector.tasks, 'RUNNING')
+
+    def is_paused(self, connector, node=None):
+        status = self._connector_status(connector.name, node)
+        return self._has_state(status, 'PAUSED') and self._all_tasks_have_state(status, connector.tasks, 'PAUSED')
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     def test_pause_and_resume_source(self):
         """
         Verify that source connectors stop producing records when paused and begin again after
@@ -206,7 +233,11 @@ class ConnectDistributedTest(Test):
         self.cc.set_configs(lambda node: self.render("connect-distributed.properties", node=node))
         self.cc.start()
 
+<<<<<<< HEAD
         self.source = VerifiableSource(self.cc, topic=self.TOPIC)
+=======
+        self.source = VerifiableSource(self.cc)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         self.source.start()
 
         wait_until(lambda: self.is_running(self.source), timeout_sec=30,
@@ -220,9 +251,15 @@ class ConnectDistributedTest(Test):
                        err_msg="Failed to see connector transition to the PAUSED state")
 
         # verify that we do not produce new messages while paused
+<<<<<<< HEAD
         num_messages = len(self.source.sent_messages())
         time.sleep(10)
         assert num_messages == len(self.source.sent_messages()), "Paused source connector should not produce any messages"
+=======
+        num_messages = len(self.source.messages())
+        time.sleep(10)
+        assert num_messages == len(self.source.messages()), "Paused source connector should not produce any messages"
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         self.cc.resume_connector(self.source.name)
 
@@ -231,10 +268,16 @@ class ConnectDistributedTest(Test):
                        err_msg="Failed to see connector transition to the RUNNING state")
 
         # after resuming, we should see records produced again
+<<<<<<< HEAD
         wait_until(lambda: len(self.source.sent_messages()) > num_messages, timeout_sec=30,
                    err_msg="Failed to produce messages after resuming source connector")
 
     @cluster(num_nodes=5)
+=======
+        wait_until(lambda: len(self.source.messages()) > num_messages, timeout_sec=30,
+                   err_msg="Failed to produce messages after resuming source connector")
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     def test_pause_and_resume_sink(self):
         """
         Verify that sink connectors stop consuming records when paused and begin again after
@@ -246,8 +289,66 @@ class ConnectDistributedTest(Test):
         self.cc.start()
 
         # use the verifiable source to produce a steady stream of messages
+<<<<<<< HEAD
         self.source = VerifiableSource(self.cc, topic=self.TOPIC)
         self.source.start()
+=======
+        self.source = VerifiableSource(self.cc)
+        self.source.start()
+
+        self.sink = VerifiableSink(self.cc)
+        self.sink.start()
+
+        wait_until(lambda: self.is_running(self.sink), timeout_sec=30,
+                   err_msg="Failed to see connector transition to the RUNNING state")
+        
+        self.cc.pause_connector(self.sink.name)
+
+        # wait until all nodes report the paused transition
+        for node in self.cc.nodes:
+            wait_until(lambda: self.is_paused(self.sink, node), timeout_sec=30,
+                       err_msg="Failed to see connector transition to the PAUSED state")
+
+        # verify that we do not consume new messages while paused
+        num_messages = len(self.sink.received_messages())
+        time.sleep(10)
+        assert num_messages == len(self.sink.received_messages()), "Paused sink connector should not consume any messages"
+
+        self.cc.resume_connector(self.sink.name)
+
+        for node in self.cc.nodes:
+            wait_until(lambda: self.is_running(self.sink, node), timeout_sec=30,
+                       err_msg="Failed to see connector transition to the RUNNING state")
+
+        # after resuming, we should see records consumed again
+        wait_until(lambda: len(self.sink.received_messages()) > num_messages, timeout_sec=30,
+                   err_msg="Failed to consume messages after resuming source connector")
+
+
+    def test_pause_state_persistent(self):
+        """
+        Verify that paused state is preserved after a cluster restart.
+        """
+
+        self.setup_services()
+        self.cc.set_configs(lambda node: self.render("connect-distributed.properties", node=node))
+        self.cc.start()
+
+        self.source = VerifiableSource(self.cc)
+        self.source.start()
+
+        wait_until(lambda: self.is_running(self.source), timeout_sec=30,
+                   err_msg="Failed to see connector transition to the RUNNING state")
+        
+        self.cc.pause_connector(self.source.name)
+
+        self.cc.restart()
+
+        # we should still be paused after restarting
+        for node in self.cc.nodes:
+            wait_until(lambda: self.is_paused(self.source, node), timeout_sec=30,
+                       err_msg="Failed to see connector startup in PAUSED state")
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         wait_until(lambda: len(self.source.committed_messages()) > 0, timeout_sec=30,
                    err_msg="Timeout expired waiting for source task to produce a message")

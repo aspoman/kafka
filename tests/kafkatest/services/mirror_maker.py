@@ -14,6 +14,10 @@
 # limitations under the License.
 
 import os
+<<<<<<< HEAD
+=======
+import subprocess
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 from ducktape.services.service import Service
 from ducktape.utils.util import wait_until
@@ -119,10 +123,13 @@ class MirrorMaker(KafkaPathResolverMixin, Service):
         cmd = "export LOG_DIR=%s;" % MirrorMaker.LOG_DIR
         cmd += " export KAFKA_LOG4J_OPTS=\"-Dlog4j.configuration=file:%s\";" % MirrorMaker.LOG4J_CONFIG
         cmd += " export KAFKA_OPTS=%s;" % self.security_config.kafka_opts
+<<<<<<< HEAD
         # add external dependencies, for instance for interceptors
         if self.external_jars is not None:
             cmd += "for file in %s; do CLASSPATH=$CLASSPATH:$file; done; " % self.external_jars
             cmd += "export CLASSPATH; "
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         cmd += " %s kafka.tools.MirrorMaker" % self.path.script("kafka-run-class.sh", node)
         cmd += " --consumer.config %s" % MirrorMaker.CONSUMER_CONFIG
         cmd += " --producer.config %s" % MirrorMaker.PRODUCER_CONFIG

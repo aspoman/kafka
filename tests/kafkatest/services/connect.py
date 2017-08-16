@@ -17,12 +17,19 @@ import json
 import os.path
 import random
 import signal
+<<<<<<< HEAD
 import time
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 import requests
 from ducktape.errors import DucktapeError
 from ducktape.services.service import Service
 from ducktape.utils.util import wait_until
+<<<<<<< HEAD
+=======
+from kafkatest.utils.util import retry_on_exception
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 from kafkatest.directory_layout.kafka_path import KafkaPathResolverMixin
 
@@ -108,14 +115,22 @@ class ConnectServiceBase(KafkaPathResolverMixin, Service):
     def config_filenames(self):
         return [os.path.join(self.PERSISTENT_ROOT, "connect-connector-" + str(idx) + ".properties") for idx, template in enumerate(self.connector_config_templates or [])]
 
+<<<<<<< HEAD
     def list_connectors(self, node=None, **kwargs):
         return self._rest_with_retry('/connectors', node=node, **kwargs)
 
     def create_connector(self, config, node=None, **kwargs):
+=======
+    def list_connectors(self, node=None, retries=0, retry_backoff=.01):
+        return self._rest_with_retry('/connectors', node=node, retries=retries, retry_backoff=retry_backoff)
+
+    def create_connector(self, config, node=None, retries=0, retry_backoff=.01):
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         create_request = {
             'name': config['name'],
             'config': config
         }
+<<<<<<< HEAD
         return self._rest_with_retry('/connectors', create_request, node=node, method="POST", **kwargs)
 
     def get_connector(self, name, node=None, **kwargs):
@@ -151,6 +166,33 @@ class ConnectServiceBase(KafkaPathResolverMixin, Service):
 
     def resume_connector(self, name, node=None):
         return self._rest('/connectors/' + name + '/resume', node=node, method="PUT")
+=======
+        return self._rest_with_retry('/connectors', create_request, node=node, method="POST", retries=retries, retry_backoff=retry_backoff)
+
+    def get_connector(self, name, node=None, retries=0, retry_backoff=.01):
+        return self._rest_with_retry('/connectors/' + name, node=node, retries=retries, retry_backoff=retry_backoff)
+
+    def get_connector_config(self, name, node=None, retries=0, retry_backoff=.01):
+        return self._rest_with_retry('/connectors/' + name + '/config', node=node, retries=retries, retry_backoff=retry_backoff)
+
+    def set_connector_config(self, name, config, node=None, retries=0, retry_backoff=.01):
+        return self._rest_with_retry('/connectors/' + name + '/config', config, node=node, method="PUT", retries=retries, retry_backoff=retry_backoff)
+
+    def get_connector_tasks(self, name, node=None, retries=0, retry_backoff=.01):
+        return self._rest_with_retry('/connectors/' + name + '/tasks', node=node, retries=retries, retry_backoff=retry_backoff)
+
+    def delete_connector(self, name, node=None, retries=0, retry_backoff=.01):
+        return self._rest_with_retry('/connectors/' + name, node=node, method="DELETE", retries=retries, retry_backoff=retry_backoff)
+
+    def get_connector_status(self, name, node=None):
+        return self._rest('/connectors/' + name + '/status', node=node)
+
+    def pause_connector(self, name, node=None):
+        return self._rest('/connectors/' + name + '/pause', method="PUT")
+
+    def resume_connector(self, name, node=None):
+        return self._rest('/connectors/' + name + '/resume', method="PUT")
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     def list_connector_plugins(self, node=None):
         return self._rest('/connector-plugins/', node=node)
@@ -175,6 +217,7 @@ class ConnectServiceBase(KafkaPathResolverMixin, Service):
         else:
             return resp.json()
 
+<<<<<<< HEAD
     def _rest_with_retry(self, path, body=None, node=None, method="GET", retries=40, retry_backoff=.25):
         """
         Invokes a REST API with retries for errors that may occur during normal operation (notably 409 CONFLICT
@@ -190,6 +233,10 @@ class ConnectServiceBase(KafkaPathResolverMixin, Service):
                     break
                 time.sleep(retry_backoff)
         raise exception_to_throw
+=======
+    def _rest_with_retry(self, path, body=None, node=None, method="GET", retries=0, retry_backoff=.01):
+        return retry_on_exception(lambda: self._rest(path, body, node, method), ConnectRestError, retries, retry_backoff)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     def _base_url(self, node):
         return 'http://' + node.account.externally_routable_ip + ':' + '8083'
@@ -209,8 +256,11 @@ class ConnectStandaloneService(ConnectServiceBase):
     def start_cmd(self, node, connector_configs):
         cmd = "( export KAFKA_LOG4J_OPTS=\"-Dlog4j.configuration=file:%s\"; " % self.LOG4J_CONFIG_FILE
         cmd += "export KAFKA_OPTS=%s; " % self.security_config.kafka_opts
+<<<<<<< HEAD
         for envvar in self.environment:
             cmd += "export %s=%s; " % (envvar, str(self.environment[envvar]))
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         cmd += "%s %s " % (self.path.script("connect-standalone.sh", node), self.CONFIG_FILE)
         cmd += " ".join(connector_configs)
         cmd += " & echo $! >&3 ) 1>> %s 2>> %s 3> %s" % (self.STDOUT_FILE, self.STDERR_FILE, self.PID_FILE)
@@ -230,10 +280,15 @@ class ConnectStandaloneService(ConnectServiceBase):
 
         self.logger.info("Starting Kafka Connect standalone process on " + str(node.account))
         with node.account.monitor_log(self.LOG_FILE) as monitor:
+<<<<<<< HEAD
             cmd = self.start_cmd(node, remote_connector_configs)
             self.logger.debug("Connect standalone command: %s", cmd)
             node.account.ssh(cmd)
             monitor.wait_until('Kafka Connect started', timeout_sec=60, err_msg="Never saw message indicating Kafka Connect finished startup on " + str(node.account))
+=======
+            node.account.ssh(self.start_cmd(node, remote_connector_configs))
+            monitor.wait_until('Kafka Connect started', timeout_sec=30, err_msg="Never saw message indicating Kafka Connect finished startup on " + str(node.account))
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         if len(self.pids(node)) == 0:
             raise RuntimeError("No process ids recorded")
@@ -252,8 +307,11 @@ class ConnectDistributedService(ConnectServiceBase):
     def start_cmd(self, node):
         cmd = "( export KAFKA_LOG4J_OPTS=\"-Dlog4j.configuration=file:%s\"; " % self.LOG4J_CONFIG_FILE
         cmd += "export KAFKA_OPTS=%s; " % self.security_config.kafka_opts
+<<<<<<< HEAD
         for envvar in self.environment:
             cmd += "export %s=%s; " % (envvar, str(self.environment[envvar]))
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         cmd += "%s %s " % (self.path.script("connect-distributed.sh", node), self.CONFIG_FILE)
         cmd += " & echo $! >&3 ) 1>> %s 2>> %s 3> %s" % (self.STDOUT_FILE, self.STDERR_FILE, self.PID_FILE)
         return cmd

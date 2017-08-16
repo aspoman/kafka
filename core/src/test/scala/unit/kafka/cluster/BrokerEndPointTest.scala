@@ -160,6 +160,7 @@ class BrokerEndPointTest {
     // also test for ipv6
     connectionString = "[::1]:9092"
     endpoint = BrokerEndPoint.createBrokerEndPoint(1, connectionString)
+<<<<<<< HEAD
     assertEquals("::1", endpoint.host)
     assertEquals(9092, endpoint.port)
     // test for ipv6 with % character
@@ -167,6 +168,15 @@ class BrokerEndPointTest {
     endpoint = BrokerEndPoint.createBrokerEndPoint(1, connectionString)
     assertEquals("fe80::b1da:69ca:57f7:63d8%3", endpoint.host)
     assertEquals(9092, endpoint.port)
+=======
+    assert(endpoint.host == "::1")
+    assert(endpoint.port == 9092)
+    // test for ipv6 with % character
+    connectionString = "[fe80::b1da:69ca:57f7:63d8%3]:9092"
+    endpoint = BrokerEndPoint.createBrokerEndPoint(1, connectionString)
+    assert(endpoint.host == "fe80::b1da:69ca:57f7:63d8%3")
+    assert(endpoint.port == 9092)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     // add test for uppercase in hostname
     connectionString = "MyHostname:9092"
     endpoint = BrokerEndPoint.createBrokerEndPoint(1, connectionString)
@@ -195,6 +205,7 @@ class BrokerEndPointTest {
     assertEquals( "PLAINTEXT://:9092", endpoint.connectionString)
     // also test for ipv6
     connectionString = "PLAINTEXT://[::1]:9092"
+<<<<<<< HEAD
     endpoint = EndPoint.createEndPoint(connectionString, None)
     assertEquals("::1", endpoint.host)
     assertEquals(9092, endpoint.port)
@@ -205,6 +216,18 @@ class BrokerEndPointTest {
     assertEquals("fe80::b1da:69ca:57f7:63d8%3", endpoint.host)
     assertEquals(9092, endpoint.port)
     assertEquals("PLAINTEXT://[fe80::b1da:69ca:57f7:63d8%3]:9092", endpoint.connectionString)
+=======
+    endpoint = EndPoint.createEndPoint(connectionString)
+    assert(endpoint.host == "::1")
+    assert(endpoint.port == 9092)
+    assert(endpoint.connectionString ==  "PLAINTEXT://[::1]:9092")
+    // test for ipv6 with % character
+    connectionString = "PLAINTEXT://[fe80::b1da:69ca:57f7:63d8%3]:9092"
+    endpoint = EndPoint.createEndPoint(connectionString)
+    assert(endpoint.host == "fe80::b1da:69ca:57f7:63d8%3")
+    assert(endpoint.port == 9092)
+    assert(endpoint.connectionString ==  "PLAINTEXT://[fe80::b1da:69ca:57f7:63d8%3]:9092")
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     // test hostname
     connectionString = "PLAINTEXT://MyHostname:9092"
     endpoint = EndPoint.createEndPoint(connectionString, None)

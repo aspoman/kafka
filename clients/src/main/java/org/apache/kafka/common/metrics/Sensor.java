@@ -168,6 +168,7 @@ public final class Sensor {
      *         bound
      */
     public void record(double value, long timeMs) {
+<<<<<<< HEAD
         record(value, timeMs, true);
     }
 
@@ -183,6 +184,14 @@ public final class Sensor {
             }
             for (Sensor parent : parents)
                 parent.record(value, timeMs, checkQuotas);
+=======
+        this.lastRecordTime = timeMs;
+        synchronized (this) {
+            // increment all the stats
+            for (int i = 0; i < this.stats.size(); i++)
+                this.stats.get(i).record(config, value, timeMs);
+            checkQuotas(timeMs);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
     }
 

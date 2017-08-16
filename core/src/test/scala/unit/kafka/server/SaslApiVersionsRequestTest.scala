@@ -19,12 +19,19 @@ package kafka.server
 import java.io.IOException
 import java.net.Socket
 import java.util.Collections
+<<<<<<< HEAD
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.common.protocol.{ApiKeys, Errors, SecurityProtocol}
 import org.apache.kafka.common.requests.{ApiVersionsRequest, ApiVersionsResponse}
 import org.apache.kafka.common.requests.SaslHandshakeRequest
 import org.apache.kafka.common.requests.SaslHandshakeResponse
+<<<<<<< HEAD
 import org.junit.{After, Before, Test}
+=======
+import org.junit.Test
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.junit.Assert._
 import kafka.api.{KafkaSasl, SaslSetup}
 import kafka.utils.JaasTestUtils
@@ -81,10 +88,16 @@ class SaslApiVersionsRequestTest extends BaseRequestTest with SaslSetup {
   def testApiVersionsRequestWithUnsupportedVersion() {
     val plaintextSocket = connect(protocol = securityProtocol)
     try {
+<<<<<<< HEAD
       val apiVersionsRequest = new ApiVersionsRequest(0)
       val apiVersionsResponse = sendApiVersionsRequest(plaintextSocket, apiVersionsRequest, Some(Short.MaxValue))
       assertEquals(Errors.UNSUPPORTED_VERSION, apiVersionsResponse.error)
       val apiVersionsResponse2 = sendApiVersionsRequest(plaintextSocket, new ApiVersionsRequest.Builder().build(0))
+=======
+      val apiVersionsResponse = sendApiVersionsRequest(plaintextSocket, new ApiVersionsRequest, Short.MaxValue)
+      assertEquals(Errors.UNSUPPORTED_VERSION.code(), apiVersionsResponse.errorCode)
+      val apiVersionsResponse2 = sendApiVersionsRequest(plaintextSocket, new ApiVersionsRequest, 0)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
       ApiVersionsRequestTest.validateApiVersionsResponse(apiVersionsResponse2)
       sendSaslHandshakeRequestValidateResponse(plaintextSocket)
     } finally {
@@ -92,10 +105,16 @@ class SaslApiVersionsRequestTest extends BaseRequestTest with SaslSetup {
     }
   }
 
+<<<<<<< HEAD
   private def sendApiVersionsRequest(socket: Socket, request: ApiVersionsRequest,
                                      apiVersion: Option[Short] = None): ApiVersionsResponse = {
     val response = send(request, ApiKeys.API_VERSIONS, socket, apiVersion)
     ApiVersionsResponse.parse(response, request.version)
+=======
+  private def sendApiVersionsRequest(socket: Socket, request: ApiVersionsRequest, version: Short): ApiVersionsResponse = {
+    val response = send(socket, request, ApiKeys.API_VERSIONS, version)
+    ApiVersionsResponse.parse(response)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 
   private def sendSaslHandshakeRequestValidateResponse(socket: Socket) {

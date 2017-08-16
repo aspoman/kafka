@@ -271,12 +271,79 @@ public class StreamPartitionAssignor implements PartitionAssignor, Configurable,
         return new Subscription(new ArrayList<>(topics), data.encode());
     }
 
+<<<<<<< HEAD
     private void updateSubscribedTopics(Set<String> topics) {
         SubscriptionUpdates subscriptionUpdates = new SubscriptionUpdates();
         log.debug("{} found {} topics possibly matching regex", logPrefix, topics);
         // update the topic groups with the returned subscription set for regex pattern subscriptions
         subscriptionUpdates.updateTopics(topics);
         threadDataProvider.builder().updateSubscriptions(subscriptionUpdates, threadDataProvider.name());
+=======
+    /**
+     * Internal helper function that creates a Kafka topic
+     * @param topicToTaskIds Map that contains the topic names to be created
+     * @param compactTopic If true, the topic should be a compacted topic. This is used for
+     *                     change log topics usually.
+     * @param postPartitionPhase If true, the computation for calculating the number of partitions
+     *                           is slightly different. Set to true after the initial topic-to-partition
+     *                           assignment.
+     * @return
+     */
+    private Map<TopicPartition, PartitionInfo> prepareTopic(Map<String, Set<TaskId>> topicToTaskIds,
+                                                            boolean compactTopic,
+                                                            boolean postPartitionPhase) {
+        Map<TopicPartition, PartitionInfo> partitionInfos = new HashMap<>();
+        // if ZK is specified, prepare the internal source topic before calling partition grouper
+        if (internalTopicManager != null) {
+            log.debug("Starting to validate internal topics in partition assignor.");
+
+            for (Map.Entry<String, Set<TaskId>> entry : topicToTaskIds.entrySet()) {
+                String topic = entry.getKey();
+                int numPartitions = 0;
+                if (postPartitionPhase) {
+                    // the expected number of partitions is the max value of TaskId.partition + 1
+                    for (TaskId task : entry.getValue()) {
+                        if (numPartitions < task.partition + 1)
+                            numPartitions = task.partition + 1;
+                    }
+                } else {
+                    // should have size 1 only
+                    numPartitions = -1;
+                    for (TaskId task : entry.getValue()) {
+                        numPartitions = task.partition;
+                    }
+                }
+
+                internalTopicManager.makeReady(topic, numPartitions, compactTopic);
+
+                // wait until the topic metadata has been propagated to all brokers
+                List<PartitionInfo> partitions;
+                do {
+                    partitions = streamThread.restoreConsumer.partitionsFor(topic);
+                } while (partitions == null || partitions.size() != numPartitions);
+
+                for (PartitionInfo partition : partitions)
+                    partitionInfos.put(new TopicPartition(partition.topic(), partition.partition()), partition);
+            }
+
+            log.info("Completed validating internal topics in partition assignor.");
+        } else {
+            List<String> missingTopics = new ArrayList<>();
+            for (String topic : topicToTaskIds.keySet()) {
+                List<PartitionInfo> partitions = streamThread.restoreConsumer.partitionsFor(topic);
+                if (partitions == null) {
+                    missingTopics.add(topic);
+                }
+            }
+            if (!missingTopics.isEmpty()) {
+                log.warn("Topic {} do not exists but couldn't created as the config '{}' isn't supplied",
+                         missingTopics, StreamsConfig.ZOOKEEPER_CONNECT_CONFIG);
+
+            }
+        }
+
+        return partitionInfos;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /*
@@ -398,6 +465,7 @@ public class StreamPartitionAssignor implements PartitionAssignor, Configurable,
             }
         }
 
+<<<<<<< HEAD
         // ensure the co-partitioning topics within the group have the same number of partitions,
         // and enforce the number of partitions for those repartition topics to be the same if they
         // are co-partitioned as well.
@@ -406,6 +474,10 @@ public class StreamPartitionAssignor implements PartitionAssignor, Configurable,
         // make sure the repartition source topics exist with the right number of partitions,
         // create these topics if necessary
         prepareTopic(repartitionTopicMetadata);
+=======
+        Map<TopicPartition, PartitionInfo> internalPartitionInfos = prepareTopic(internalSourceTopicToTaskIds, false, false);
+        internalSourceTopicToTaskIds.clear();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         metadataWithInternalTopics = metadata.withPartitions(allRepartitionTopicPartitions);
 
@@ -571,6 +643,14 @@ public class StreamPartitionAssignor implements PartitionAssignor, Configurable,
             }
         }
 
+<<<<<<< HEAD
+=======
+        // if ZK is specified, validate the internal topics again
+        prepareTopic(internalSourceTopicToTaskIds, false /* compactTopic */, true);
+        // change log topics should be compacted
+        prepareTopic(stateChangelogTopicToTaskIds, true /* compactTopic */, true);
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         return assignment;
     }
 

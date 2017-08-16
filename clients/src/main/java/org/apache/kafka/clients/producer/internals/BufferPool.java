@@ -118,6 +118,7 @@ public class BufferPool {
                 // we are out of memory and will have to block
                 int accumulated = 0;
                 Condition moreMemory = this.lock.newCondition();
+<<<<<<< HEAD
                 try {
                     long remainingTimeToBlockNs = TimeUnit.MILLISECONDS.toNanos(maxTimeToBlockMs);
                     this.waiters.addLast(moreMemory);
@@ -155,6 +156,46 @@ public class BufferPool {
                             this.nonPooledAvailableMemory -= got;
                             accumulated += got;
                         }
+=======
+                long remainingTimeToBlockNs = TimeUnit.MILLISECONDS.toNanos(maxTimeToBlockMs);
+                this.waiters.addLast(moreMemory);
+                // loop over and over until we have a buffer or have reserved
+                // enough memory to allocate one
+                while (accumulated < size) {
+                    long startWaitNs = time.nanoseconds();
+                    long timeNs;
+                    boolean waitingTimeElapsed;
+                    try {
+                        waitingTimeElapsed = !moreMemory.await(remainingTimeToBlockNs, TimeUnit.NANOSECONDS);
+                    } catch (InterruptedException e) {
+                        this.waiters.remove(moreMemory);
+                        throw e;
+                    } finally {
+                        long endWaitNs = time.nanoseconds();
+                        timeNs = Math.max(0L, endWaitNs - startWaitNs);
+                        this.waitTime.record(timeNs, time.milliseconds());
+                    }
+
+                    if (waitingTimeElapsed) {
+                        this.waiters.remove(moreMemory);
+                        throw new TimeoutException("Failed to allocate memory within the configured max blocking time " + maxTimeToBlockMs + " ms.");
+                    }
+
+                    remainingTimeToBlockNs -= timeNs;
+                    // check if we can satisfy this request from the free list,
+                    // otherwise allocate memory
+                    if (accumulated == 0 && size == this.poolableSize && !this.free.isEmpty()) {
+                        // just grab a buffer from the free list
+                        buffer = this.free.pollFirst();
+                        accumulated = size;
+                    } else {
+                        // we'll need to allocate memory, but we may only get
+                        // part of what we need on this iteration
+                        freeUp(size - accumulated);
+                        int got = (int) Math.min(size - accumulated, this.availableMemory);
+                        this.availableMemory -= got;
+                        accumulated += got;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                     }
                     // Don't reclaim memory on throwable since nothing was thrown
                     accumulated = 0;

@@ -174,11 +174,23 @@ abstract class AbstractFetcherThread(name: String,
               partitionData.error match {
                 case Errors.NONE =>
                   try {
+<<<<<<< HEAD
                     val records = partitionData.toRecords
                     val newOffset = records.batches.asScala.lastOption.map(_.nextOffset).getOrElse(
                       currentPartitionFetchState.fetchOffset)
 
                     fetcherLagStats.getAndMaybePut(topic, partitionId).lag = Math.max(0L, partitionData.highWatermark - newOffset)
+=======
+                    val messages = partitionData.toByteBufferMessageSet
+                    val validBytes = messages.validBytes
+                    val newOffset = messages.shallowIterator.toSeq.lastOption match {
+                      case Some(m: MessageAndOffset) => m.nextOffset
+                      case None => currentPartitionFetchState.offset
+                    }
+                    partitionMap.put(topicAndPartition, new PartitionFetchState(newOffset))
+                    fetcherLagStats.getAndMaybePut(topic, partitionId).lag = Math.max(0L, partitionData.highWatermark - newOffset)
+                    fetcherStats.byteRate.mark(validBytes)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                     // Once we hand off the partition data to the subclass, we can't mess with it any more in this thread
                     processPartitionData(topicPartition, currentPartitionFetchState.fetchOffset, partitionData)
 
@@ -285,9 +297,15 @@ abstract class AbstractFetcherThread(name: String,
   def removePartitions(topicPartitions: Set[TopicPartition]) {
     partitionMapLock.lockInterruptibly()
     try {
+<<<<<<< HEAD
       topicPartitions.foreach { topicPartition =>
         partitionStates.remove(topicPartition)
         fetcherLagStats.unregister(topicPartition.topic, topicPartition.partition)
+=======
+      topicAndPartitions.foreach { topicAndPartition =>
+        partitionMap.remove(topicAndPartition)
+        fetcherLagStats.unregister(topicAndPartition.topic, topicAndPartition.partition)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
       }
     } finally partitionMapLock.unlock()
   }
@@ -356,6 +374,7 @@ class FetcherLagStats(metricId: ClientIdAndBroker) {
     stats.getAndMaybePut(new ClientIdTopicPartition(metricId.clientId, topic, partitionId))
   }
 
+<<<<<<< HEAD
   def isReplicaInSync(topic: String, partitionId: Int): Boolean = {
     val fetcherLagMetrics = stats.get(new ClientIdTopicPartition(metricId.clientId, topic, partitionId))
     if (fetcherLagMetrics != null)
@@ -364,6 +383,8 @@ class FetcherLagStats(metricId: ClientIdAndBroker) {
       false
   }
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   def unregister(topic: String, partitionId: Int) {
     val lagMetrics = stats.remove(new ClientIdTopicPartition(metricId.clientId, topic, partitionId))
     if (lagMetrics != null) lagMetrics.unregister()

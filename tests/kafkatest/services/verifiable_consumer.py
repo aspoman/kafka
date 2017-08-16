@@ -16,13 +16,21 @@
 import json
 import os
 import signal
+<<<<<<< HEAD
+=======
+import subprocess
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 from ducktape.services.background_thread import BackgroundThreadService
 
 from kafkatest.directory_layout.kafka_path import KafkaPathResolverMixin
 from kafkatest.services.kafka import TopicPartition
+<<<<<<< HEAD
 from kafkatest.services.verifiable_client import VerifiableClientMixin
 from kafkatest.version import DEV_BRANCH
+=======
+from kafkatest.version import TRUNK
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 class ConsumerState:
@@ -30,6 +38,7 @@ class ConsumerState:
     Dead = 2
     Rebalancing = 3
     Joined = 4
+
 
 
 class ConsumerEventHandler(object):
@@ -129,6 +138,7 @@ class ConsumerEventHandler(object):
             return None
 
 
+<<<<<<< HEAD
 class VerifiableConsumer(KafkaPathResolverMixin, VerifiableClientMixin, BackgroundThreadService):
     """This service wraps org.apache.kafka.tools.VerifiableConsumer for use in
     system testing. 
@@ -138,6 +148,9 @@ class VerifiableConsumer(KafkaPathResolverMixin, VerifiableClientMixin, Backgrou
     taken to ensure compatibility.
     """
 
+=======
+class VerifiableConsumer(KafkaPathResolverMixin, BackgroundThreadService):
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     PERSISTENT_ROOT = "/mnt/verifiable_consumer"
     STDOUT_CAPTURE = os.path.join(PERSISTENT_ROOT, "verifiable_consumer.stdout")
     STDERR_CAPTURE = os.path.join(PERSISTENT_ROOT, "verifiable_consumer.stderr")
@@ -161,7 +174,11 @@ class VerifiableConsumer(KafkaPathResolverMixin, VerifiableClientMixin, Backgrou
     def __init__(self, context, num_nodes, kafka, topic, group_id,
                  max_messages=-1, session_timeout_sec=30, enable_autocommit=False,
                  assignment_strategy="org.apache.kafka.clients.consumer.RangeAssignor",
+<<<<<<< HEAD
                  version=DEV_BRANCH, stop_timeout_sec=30, log_level="INFO"):
+=======
+                 version=TRUNK, stop_timeout_sec=30):
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         super(VerifiableConsumer, self).__init__(context, num_nodes)
         self.log_level = log_level
         
@@ -173,6 +190,11 @@ class VerifiableConsumer(KafkaPathResolverMixin, VerifiableClientMixin, Backgrou
         self.enable_autocommit = enable_autocommit
         self.assignment_strategy = assignment_strategy
         self.prop_file = ""
+<<<<<<< HEAD
+=======
+        self.security_config = kafka.security_config.client_config(self.prop_file)
+        self.prop_file += str(self.security_config)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         self.stop_timeout_sec = stop_timeout_sec
 
         self.event_handlers = {}
@@ -262,9 +284,15 @@ class VerifiableConsumer(KafkaPathResolverMixin, VerifiableClientMixin, Backgrou
         cmd += "export LOG_DIR=%s;" % VerifiableConsumer.LOG_DIR
         cmd += " export KAFKA_OPTS=%s;" % self.security_config.kafka_opts
         cmd += " export KAFKA_LOG4J_OPTS=\"-Dlog4j.configuration=file:%s\"; " % VerifiableConsumer.LOG4J_CONFIG
+<<<<<<< HEAD
         cmd += self.impl.exec_cmd(node)
         cmd += " --group-id %s --topic %s --broker-list %s --session-timeout %s --assignment-strategy %s %s" % \
                (self.group_id, self.topic, self.kafka.bootstrap_servers(self.security_config.security_protocol),
+=======
+        cmd += self.path.script("kafka-run-class.sh", node) + " org.apache.kafka.tools.VerifiableConsumer" \
+              " --group-id %s --topic %s --broker-list %s --session-timeout %s --assignment-strategy %s %s" % \
+                                            (self.group_id, self.topic, self.kafka.bootstrap_servers(self.security_config.security_protocol),
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                self.session_timeout_sec*1000, self.assignment_strategy, "--enable-autocommit" if self.enable_autocommit else "")
                
         if self.max_messages > 0:

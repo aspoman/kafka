@@ -17,6 +17,7 @@
 package org.apache.kafka.streams;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+<<<<<<< HEAD
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.config.ConfigException;
@@ -29,12 +30,18 @@ import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.processor.FailOnInvalidTimestamp;
 import org.apache.kafka.streams.processor.TimestampExtractor;
 import org.hamcrest.CoreMatchers;
+=======
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.Serializer;
+import org.apache.kafka.common.utils.Utils;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+<<<<<<< HEAD
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -46,6 +53,11 @@ import static org.apache.kafka.streams.StreamsConfig.consumerPrefix;
 import static org.apache.kafka.streams.StreamsConfig.producerPrefix;
 import static org.apache.kafka.test.StreamsTestUtils.minimalStreamsConfig;
 import static org.hamcrest.core.IsEqual.equalTo;
+=======
+import java.util.Map;
+import java.util.Properties;
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -61,9 +73,14 @@ public class StreamsConfigTest {
     public void setUp() {
         props.put(StreamsConfig.APPLICATION_ID_CONFIG, "streams-config-test");
         props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+<<<<<<< HEAD
         props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         props.put("DUMMY", "dummy");
+=======
+        props.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         props.put("key.deserializer.encoding", "UTF8");
         props.put("value.deserializer.encoding", "UTF-16");
         streamsConfig = new StreamsConfig(props);
@@ -92,6 +109,7 @@ public class StreamsConfigTest {
 
     @Test
     public void testGetConsumerConfigs() throws Exception {
+<<<<<<< HEAD
         final String groupId = "example-application";
         final String clientId = "client";
         final Map<String, Object> returnedProps = streamsConfig.getConsumerConfigs(null, groupId, clientId);
@@ -99,6 +117,12 @@ public class StreamsConfigTest {
         assertEquals(returnedProps.get(ConsumerConfig.GROUP_ID_CONFIG), groupId);
         assertEquals(returnedProps.get(ConsumerConfig.MAX_POLL_RECORDS_CONFIG), "1000");
         assertNull(returnedProps.get("DUMMY"));
+=======
+        Map<String, Object> returnedProps = streamsConfig.getConsumerConfigs(null, "example-application", "client");
+        assertEquals(returnedProps.get(ConsumerConfig.CLIENT_ID_CONFIG), "client-consumer");
+        assertEquals(returnedProps.get(ConsumerConfig.GROUP_ID_CONFIG), "example-application");
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     @Test
@@ -520,4 +544,37 @@ public class StreamsConfigTest {
             return 0;
         }
     }
+
+    @Test
+    public void defaultSerdeShouldBeConfigured() {
+        Map<String, Object> serializerConfigs = new HashMap<String, Object>();
+        serializerConfigs.put("key.serializer.encoding", "UTF8");
+        serializerConfigs.put("value.serializer.encoding", "UTF-16");
+        Serializer<String> serializer = Serdes.String().serializer();
+
+        String str = "my string for testing";
+        String topic = "my topic";
+
+        serializer.configure(serializerConfigs, true);
+        assertEquals("Should get the original string after serialization and deserialization with the configured encoding",
+                str, streamsConfig.keySerde().deserializer().deserialize(topic, serializer.serialize(topic, str)));
+
+        serializer.configure(serializerConfigs, false);
+        assertEquals("Should get the original string after serialization and deserialization with the configured encoding",
+                str, streamsConfig.valueSerde().deserializer().deserialize(topic, serializer.serialize(topic, str)));
+    }
+
+    @Test
+    public void shouldSupportMultipleBootstrapServers() {
+        List<String> expectedBootstrapServers = Arrays.asList("broker1:9092", "broker2:9092");
+        String bootstrapServersString = Utils.mkString(expectedBootstrapServers, ",").toString();
+        Properties props = new Properties();
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "irrelevant");
+        props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServersString);
+        StreamsConfig config = new StreamsConfig(props);
+
+        List<String> actualBootstrapServers = config.getList(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG);
+        assertEquals(expectedBootstrapServers, actualBootstrapServers);
+    }
+
 }

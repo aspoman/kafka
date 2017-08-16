@@ -339,7 +339,11 @@ public class DistributedHerder extends AbstractHerder implements Runnable {
 
             // additionally, if the worker is running the connector itself, then we need to
             // request reconfiguration to ensure that config changes while paused take effect
+<<<<<<< HEAD
             if (targetState == TargetState.STARTED)
+=======
+            if (worker.ownsConnector(connector) && targetState == TargetState.STARTED)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 reconfigureConnectorTasksWithRetry(connector);
         }
     }
@@ -954,10 +958,17 @@ public class DistributedHerder extends AbstractHerder implements Runnable {
             ConnectorConfig connConfig;
             List<String> sinkTopics = null;
             if (worker.isSinkConnector(connName)) {
+<<<<<<< HEAD
                 connConfig = new SinkConnectorConfig(plugins(), configs);
                 sinkTopics = connConfig.getList(SinkConnectorConfig.TOPICS_CONFIG);
             } else {
                 connConfig = new SourceConnectorConfig(plugins(), configs);
+=======
+                connConfig = new SinkConnectorConfig(configs);
+                sinkTopics = connConfig.getList(SinkConnectorConfig.TOPICS_CONFIG);
+            } else {
+                connConfig = new SourceConnectorConfig(configs);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             }
 
             final List<Map<String, String>> taskProps

@@ -15,6 +15,10 @@
 
 
 import re
+<<<<<<< HEAD
+=======
+import subprocess
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import time
 
 from ducktape.services.service import Service
@@ -23,7 +27,11 @@ from ducktape.cluster.remoteaccount import RemoteCommandError
 
 from kafkatest.directory_layout.kafka_path import KafkaPathResolverMixin
 from kafkatest.services.security.security_config import SecurityConfig
+<<<<<<< HEAD
 from kafkatest.version import DEV_BRANCH
+=======
+from kafkatest.version import TRUNK
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 class ZookeeperService(KafkaPathResolverMixin, Service):
@@ -73,8 +81,12 @@ class ZookeeperService(KafkaPathResolverMixin, Service):
         self.logger.info(config_file)
         node.account.create_file("/mnt/zookeeper.properties", config_file)
 
+<<<<<<< HEAD
         start_cmd = "export KAFKA_OPTS=\"%s\";" % (self.kafka_opts + ' ' + self.security_system_properties) \
             if self.security_config.zk_sasl else self.kafka_opts
+=======
+        start_cmd = "export KAFKA_OPTS=\"%s\";" % self.kafka_opts 
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         start_cmd += "%s " % self.path.script("zookeeper-server-start.sh", node)
         start_cmd += "/mnt/zookeeper.properties 1>> %(path)s 2>> %(path)s &" % self.logs["zk_log"]
         node.account.ssh(start_cmd)
@@ -122,7 +134,11 @@ class ZookeeperService(KafkaPathResolverMixin, Service):
         """
         Queries zookeeper for data associated with 'path' and returns all fields in the schema
         """
+<<<<<<< HEAD
         kafka_run_class = self.path.script("kafka-run-class.sh", DEV_BRANCH)
+=======
+        kafka_run_class = self.path.script("kafka-run-class.sh", TRUNK)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         cmd = "%s kafka.tools.ZooKeeperMainWrapper -server %s get %s" % \
               (kafka_run_class, self.connect_setting(), path)
         self.logger.debug(cmd)

@@ -66,8 +66,12 @@ import static org.junit.Assert.assertTrue;
 public class InternalTopicIntegrationTest {
     private static final int NUM_BROKERS = 1;
     @ClassRule
+<<<<<<< HEAD
     public static final EmbeddedKafkaCluster CLUSTER = new EmbeddedKafkaCluster(NUM_BROKERS);
     private final MockTime mockTime = CLUSTER.time;
+=======
+    public static final EmbeddedSingleNodeKafkaCluster CLUSTER = new EmbeddedSingleNodeKafkaCluster();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     private static final String DEFAULT_INPUT_TOPIC = "inputTopic";
     private static final String DEFAULT_OUTPUT_TOPIC = "outputTopic";
     private static final int DEFAULT_ZK_SESSION_TIMEOUT_MS = 10 * 1000;
@@ -77,7 +81,12 @@ public class InternalTopicIntegrationTest {
 
     @BeforeClass
     public static void startKafkaCluster() throws Exception {
+<<<<<<< HEAD
         CLUSTER.createTopics(DEFAULT_INPUT_TOPIC, DEFAULT_OUTPUT_TOPIC);
+=======
+        CLUSTER.createTopic(DEFAULT_INPUT_TOPIC);
+        CLUSTER.createTopic(DEFAULT_OUTPUT_TOPIC);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     @Before
@@ -99,6 +108,7 @@ public class InternalTopicIntegrationTest {
         // createTopics() will only seem to work (it will return without error).  The topic will exist in
         // only ZooKeeper and will be returned when listing topics, but Kafka itself does not create the
         // topic.
+<<<<<<< HEAD
         final ZkClient zkClient = new ZkClient(
                 CLUSTER.zKConnectString(),
                 DEFAULT_ZK_SESSION_TIMEOUT_MS,
@@ -116,6 +126,29 @@ public class InternalTopicIntegrationTest {
                 final Properties prop = topicConfig._2;
                 if (topic.equals(changelog)) {
                     return prop;
+=======
+        ZkClient zkClient = new ZkClient(
+            CLUSTER.zKConnectString(),
+            DEFAULT_ZK_SESSION_TIMEOUT_MS,
+            DEFAULT_ZK_CONNECTION_TIMEOUT_MS,
+            ZKStringSerializer$.MODULE$);
+        boolean isSecure = false;
+        ZkUtils zkUtils = new ZkUtils(zkClient, new ZkConnection(CLUSTER.zKConnectString()), isSecure);
+
+        Map<String, Properties> topicConfigs = AdminUtils.fetchAllTopicConfigs(zkUtils);
+        Iterator it = topicConfigs.iterator();
+        while (it.hasNext()) {
+            Tuple2<String, Properties> topicConfig = (Tuple2<String, Properties>) it.next();
+            String topic = topicConfig._1;
+            Properties prop = topicConfig._2;
+
+            // state changelogs should be compacted
+            if (topic.endsWith(ProcessorStateManager.STATE_CHANGELOG_TOPIC_SUFFIX)) {
+                if (!prop.containsKey(LogConfig.CleanupPolicyProp()) ||
+                    !prop.getProperty(LogConfig.CleanupPolicyProp()).equals(LogConfig.Compact())) {
+                    valid = false;
+                    break;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 }
             }
             return new Properties();
@@ -135,6 +168,7 @@ public class InternalTopicIntegrationTest {
         final Properties streamsConfiguration = new Properties();
         streamsConfiguration.put(StreamsConfig.APPLICATION_ID_CONFIG, "compact-topics-integration-test");
         streamsConfiguration.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
+<<<<<<< HEAD
         streamsConfiguration.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
         streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, TestUtils.tempDirectory().getPath());
@@ -151,6 +185,29 @@ public class InternalTopicIntegrationTest {
                     }
                 }).groupBy(MockKeyValueMapper.<String, String>SelectValueMapper())
                 .count("Counts").toStream();
+=======
+        streamsConfiguration.put(StreamsConfig.ZOOKEEPER_CONNECT_CONFIG, CLUSTER.zKConnectString());
+        streamsConfiguration.put(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        streamsConfiguration.put(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        streamsConfiguration.put(StreamsConfig.STATE_DIR_CONFIG, "/tmp/kafka-streams");
+
+        KStreamBuilder builder = new KStreamBuilder();
+
+        KStream<String, String> textLines = builder.stream(DEFAULT_INPUT_TOPIC);
+
+        KStream<String, Long> wordCounts = textLines
+            .flatMapValues(new ValueMapper<String, Iterable<String>>() {
+                @Override
+                public Iterable<String> apply(String value) {
+                    return Arrays.asList(value.toLowerCase(Locale.getDefault()).split("\\W+"));
+                }
+            }).map(new KeyValueMapper<String, String, KeyValue<String, String>>() {
+                @Override
+                public KeyValue<String, String> apply(String key, String value) {
+                    return new KeyValue<String, String>(value, value);
+                }
+            }).countByKey("Counts").toStream();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         wordCounts.to(stringSerde, longSerde, DEFAULT_OUTPUT_TOPIC);
 
@@ -163,6 +220,7 @@ public class InternalTopicIntegrationTest {
         //
         // Step 2: Produce some input data to the input topic.
         //
+<<<<<<< HEAD
         produceData(Arrays.asList("hello", "world", "world", "hello world"));
 
         //
@@ -175,6 +233,9 @@ public class InternalTopicIntegrationTest {
 
     private void produceData(final List<String> inputValues) throws java.util.concurrent.ExecutionException, InterruptedException {
         final Properties producerConfig = new Properties();
+=======
+        Properties producerConfig = new Properties();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         producerConfig.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, CLUSTER.bootstrapServers());
         producerConfig.put(ProducerConfig.ACKS_CONFIG, "all");
         producerConfig.put(ProducerConfig.RETRIES_CONFIG, 0);

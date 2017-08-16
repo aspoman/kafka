@@ -14,14 +14,21 @@
 # limitations under the License.
 
 from ducktape.mark import parametrize
+<<<<<<< HEAD
 from ducktape.mark.resource import cluster
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 from ducktape.tests.test import Test
 
 from kafkatest.services.kafka import KafkaService
 from kafkatest.services.performance import ProducerPerformanceService, ConsumerPerformanceService, EndToEndLatencyService
 from kafkatest.services.performance import latency, compute_aggregate_throughput
 from kafkatest.services.zookeeper import ZookeeperService
+<<<<<<< HEAD
 from kafkatest.version import DEV_BRANCH, LATEST_0_8_2, LATEST_0_9, KafkaVersion
+=======
+from kafkatest.version import TRUNK, LATEST_0_8_2, LATEST_0_9, KafkaVersion
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 class PerformanceServiceTest(Test):

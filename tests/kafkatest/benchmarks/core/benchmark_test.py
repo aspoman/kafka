@@ -15,14 +15,21 @@
 
 from ducktape.mark import matrix
 from ducktape.mark import parametrize
+<<<<<<< HEAD
 from ducktape.mark.resource import cluster
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 from ducktape.services.service import Service
 from ducktape.tests.test import Test
 
 from kafkatest.services.kafka import KafkaService
 from kafkatest.services.performance import ProducerPerformanceService, EndToEndLatencyService, ConsumerPerformanceService, throughput, latency, compute_aggregate_throughput
 from kafkatest.services.zookeeper import ZookeeperService
+<<<<<<< HEAD
 from kafkatest.version import DEV_BRANCH, KafkaVersion
+=======
+from kafkatest.version import TRUNK, KafkaVersion
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 TOPIC_REP_ONE = "topic-replication-factor-one"
 TOPIC_REP_THREE = "topic-replication-factor-three"

@@ -22,7 +22,10 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+<<<<<<< HEAD
 import org.apache.kafka.clients.consumer.InvalidOffsetException;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.KafkaException;
@@ -36,8 +39,13 @@ import org.apache.kafka.common.metrics.stats.Avg;
 import org.apache.kafka.common.metrics.stats.Count;
 import org.apache.kafka.common.metrics.stats.Max;
 import org.apache.kafka.common.metrics.stats.Rate;
+<<<<<<< HEAD
 import org.apache.kafka.common.metrics.stats.Sum;
 import org.apache.kafka.common.utils.Time;
+=======
+import org.apache.kafka.common.utils.Time;
+import org.apache.kafka.common.utils.Utils;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.streams.KafkaClientSupplier;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.StreamsMetrics;
@@ -230,6 +238,7 @@ public class StreamThread extends Thread implements ThreadDataProvider {
                     taskManager.suspendedStandbyTaskIds());
             }
         }
+<<<<<<< HEAD
     }
 
 
@@ -541,6 +550,22 @@ public class StreamThread extends Thread implements ThreadDataProvider {
                         final Consumer<byte[], byte[]> restoreConsumer,
                         final StateDirectory stateDirectory) {
         super(threadClientId);
+=======
+    };
+
+    public StreamThread(TopologyBuilder builder,
+                        StreamsConfig config,
+                        KafkaClientSupplier clientSupplier,
+                        String applicationId,
+                        String clientId,
+                        UUID processId,
+                        Metrics metrics,
+                        Time time) {
+        super("StreamThread-" + STREAM_THREAD_ID_SEQUENCE.getAndIncrement());
+
+        this.applicationId = applicationId;
+        this.config = config;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         this.builder = builder;
         this.clientId = clientId;
         this.applicationId = config.getString(StreamsConfig.APPLICATION_ID_CONFIG);
@@ -560,6 +585,7 @@ public class StreamThread extends Thread implements ThreadDataProvider {
         log.info("{} Creating consumer client", logPrefix);
         final Map<String, Object> consumerConfigs = config.getConsumerConfigs(this, applicationId, threadClientId);
 
+<<<<<<< HEAD
         if (!builder.latestResetTopicsPattern().pattern().equals("") || !builder.earliestResetTopicsPattern().pattern().equals("")) {
             originalReset = (String) consumerConfigs.get(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG);
             log.info("{} Custom offset resets specified updating configs original auto offset reset {}", logPrefix, originalReset);
@@ -568,6 +594,19 @@ public class StreamThread extends Thread implements ThreadDataProvider {
         this.consumer = clientSupplier.getConsumer(consumerConfigs);
         taskManager.setConsumer(consumer);
     }
+=======
+        // set the producer and consumer clients
+        String threadName = getName();
+        String threadClientId = clientId + "-" + threadName;
+        log.info("Creating producer client for stream thread [{}]", threadName);
+        this.producer = clientSupplier.getProducer(config.getProducerConfigs(threadClientId));
+        log.info("Creating consumer client for stream thread [{}]", threadName);
+        this.consumer = clientSupplier.getConsumer(
+                config.getConsumerConfigs(this, applicationId, threadClientId));
+        log.info("Creating restore consumer client for stream thread [{}]", threadName);
+        this.restoreConsumer = clientSupplier.getRestoreConsumer(
+                config.getRestoreConsumerConfigs(threadClientId));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     @SuppressWarnings("ConstantConditions")
     public static StreamThread create(final InternalTopologyBuilder builder,
@@ -655,6 +694,7 @@ public class StreamThread extends Thread implements ThreadDataProvider {
                                 restoreConsumer,
                                 stateDirectory);
 
+<<<<<<< HEAD
 
     }
 
@@ -662,6 +702,8 @@ public class StreamThread extends Thread implements ThreadDataProvider {
         return String.format("stream-thread [%s]", threadClientId);
     }
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     /**
      * Execute the stream processors
      *

@@ -27,6 +27,7 @@ import org.apache.kafka.common.security.JaasUtils
 import org.apache.kafka.test.IntegrationTest
 import org.junit.experimental.categories.Category
 
+<<<<<<< HEAD
 import scala.collection.Set
 import scala.collection.JavaConverters._
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -39,6 +40,12 @@ abstract class ZooKeeperTestHarness extends JUnitSuite with Logging {
   val zkConnectionTimeout = 10000
   val zkSessionTimeout = 6000
   protected val zkAclsEnabled: Option[Boolean] = None
+=======
+trait ZooKeeperTestHarness extends JUnitSuite with Logging {
+
+  val zkConnectionTimeout = 6000
+  val zkSessionTimeout = 6000
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
   var zkUtils: ZkUtils = null
   var zookeeper: EmbeddedZookeeper = null
@@ -49,7 +56,11 @@ abstract class ZooKeeperTestHarness extends JUnitSuite with Logging {
   @Before
   def setUp() {
     zookeeper = new EmbeddedZookeeper()
+<<<<<<< HEAD
     zkUtils = ZkUtils(zkConnect, zkSessionTimeout, zkConnectionTimeout, zkAclsEnabled.getOrElse(JaasUtils.isZkSecurityEnabled()))
+=======
+    zkUtils = ZkUtils(zkConnect, zkSessionTimeout, zkConnectionTimeout, JaasUtils.isZkSecurityEnabled())
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 
   @After

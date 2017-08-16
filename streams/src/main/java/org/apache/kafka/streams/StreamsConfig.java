@@ -543,6 +543,7 @@ public class StreamsConfig extends AbstractConfig {
 
     private static final Map<String, Object> CONSUMER_DEFAULT_OVERRIDES;
     static {
+<<<<<<< HEAD
         final Map<String, Object> tempConsumerDefaultOverrides = new HashMap<>();
         tempConsumerDefaultOverrides.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "1000");
         tempConsumerDefaultOverrides.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
@@ -563,6 +564,103 @@ public class StreamsConfig extends AbstractConfig {
         final Map<String, Object> tempConsumerDefaultOverrides = new HashMap<>(CONSUMER_DEFAULT_OVERRIDES);
         tempConsumerDefaultOverrides.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, READ_COMMITTED.name().toLowerCase(Locale.ROOT));
         CONSUMER_EOS_OVERRIDES = Collections.unmodifiableMap(tempConsumerDefaultOverrides);
+=======
+        CONFIG = new ConfigDef().define(APPLICATION_ID_CONFIG,      // required with no default value
+                                        Type.STRING,
+                                        Importance.HIGH,
+                                        StreamsConfig.APPLICATION_ID_DOC)
+                                .define(BOOTSTRAP_SERVERS_CONFIG,       // required with no default value
+                                        Type.LIST,
+                                        Importance.HIGH,
+                                        CommonClientConfigs.BOOSTRAP_SERVERS_DOC)
+                                .define(CLIENT_ID_CONFIG,
+                                        Type.STRING,
+                                        "",
+                                        Importance.HIGH,
+                                        CommonClientConfigs.CLIENT_ID_DOC)
+                                .define(ZOOKEEPER_CONNECT_CONFIG,
+                                        Type.STRING,
+                                        "",
+                                        Importance.HIGH,
+                                        StreamsConfig.ZOOKEEPER_CONNECT_DOC)
+                                .define(STATE_DIR_CONFIG,
+                                        Type.STRING,
+                                        "/tmp/kafka-streams",
+                                        Importance.MEDIUM,
+                                        STATE_DIR_DOC)
+                                .define(REPLICATION_FACTOR_CONFIG,
+                                        Type.INT,
+                                        1,
+                                        Importance.MEDIUM,
+                                        REPLICATION_FACTOR_DOC)
+                                .define(TIMESTAMP_EXTRACTOR_CLASS_CONFIG,
+                                        Type.CLASS,
+                                        ConsumerRecordTimestampExtractor.class.getName(),
+                                        Importance.MEDIUM,
+                                        TIMESTAMP_EXTRACTOR_CLASS_DOC)
+                                .define(PARTITION_GROUPER_CLASS_CONFIG,
+                                        Type.CLASS,
+                                        DefaultPartitionGrouper.class.getName(),
+                                        Importance.MEDIUM,
+                                        PARTITION_GROUPER_CLASS_DOC)
+                                .define(KEY_SERDE_CLASS_CONFIG,
+                                        Type.CLASS,
+                                        Serdes.ByteArraySerde.class.getName(),
+                                        Importance.MEDIUM,
+                                        KEY_SERDE_CLASS_DOC)
+                                .define(VALUE_SERDE_CLASS_CONFIG,
+                                        Type.CLASS,
+                                        Serdes.ByteArraySerde.class.getName(),
+                                        Importance.MEDIUM,
+                                        VALUE_SERDE_CLASS_DOC)
+                                .define(COMMIT_INTERVAL_MS_CONFIG,
+                                        Type.LONG,
+                                        30000,
+                                        Importance.LOW,
+                                        COMMIT_INTERVAL_MS_DOC)
+                                .define(POLL_MS_CONFIG,
+                                        Type.LONG,
+                                        100,
+                                        Importance.LOW,
+                                        POLL_MS_DOC)
+                                .define(NUM_STREAM_THREADS_CONFIG,
+                                        Type.INT,
+                                        1,
+                                        Importance.LOW,
+                                        NUM_STREAM_THREADS_DOC)
+                                .define(NUM_STANDBY_REPLICAS_CONFIG,
+                                        Type.INT,
+                                        0,
+                                        Importance.LOW,
+                                        NUM_STANDBY_REPLICAS_DOC)
+                                .define(BUFFERED_RECORDS_PER_PARTITION_CONFIG,
+                                        Type.INT,
+                                        1000,
+                                        Importance.LOW,
+                                        BUFFERED_RECORDS_PER_PARTITION_DOC)
+                                .define(STATE_CLEANUP_DELAY_MS_CONFIG,
+                                        Type.LONG,
+                                        60000,
+                                        Importance.LOW,
+                                        STATE_CLEANUP_DELAY_MS_DOC)
+                                .define(METRIC_REPORTER_CLASSES_CONFIG,
+                                        Type.LIST,
+                                        "",
+                                        Importance.LOW,
+                                        CommonClientConfigs.METRIC_REPORTER_CLASSES_DOC)
+                                .define(METRICS_SAMPLE_WINDOW_MS_CONFIG,
+                                        Type.LONG,
+                                        30000,
+                                        atLeast(0),
+                                        Importance.LOW,
+                                        CommonClientConfigs.METRICS_SAMPLE_WINDOW_MS_DOC)
+                                .define(METRICS_NUM_SAMPLES_CONFIG,
+                                        Type.INT,
+                                        2,
+                                        atLeast(1),
+                                        Importance.LOW,
+                                        CommonClientConfigs.METRICS_NUM_SAMPLES_DOC);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     public static class InternalConfig {
@@ -781,7 +879,14 @@ public class StreamsConfig extends AbstractConfig {
      */
     @Deprecated
     public Serde keySerde() {
+<<<<<<< HEAD
         return defaultKeySerde();
+=======
+        Serde<?> serde = getConfiguredInstance(StreamsConfig.KEY_SERDE_CLASS_CONFIG, Serde.class);
+        serde.configure(originals(), true);
+
+        return serde;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /**
@@ -814,6 +919,7 @@ public class StreamsConfig extends AbstractConfig {
      */
     @Deprecated
     public Serde valueSerde() {
+<<<<<<< HEAD
         return defaultValueSerde();
     }
 
@@ -872,6 +978,12 @@ public class StreamsConfig extends AbstractConfig {
         }
 
         return parsed;
+=======
+        Serde<?> serde = getConfiguredInstance(StreamsConfig.VALUE_SERDE_CLASS_CONFIG, Serde.class);
+        serde.configure(originals(), false);
+
+        return serde;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     public static void main(final String[] args) {

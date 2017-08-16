@@ -49,6 +49,7 @@ public class ClientUtils {
                         throw new ConfigException("Invalid url in " + CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG + ": " + url);
 
                     InetSocketAddress address = new InetSocketAddress(host, port);
+<<<<<<< HEAD
 
                     if (address.isUnresolved()) {
                         log.warn("Removing server {} from {} as DNS resolution failed for {}", url, CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG, host);
@@ -56,11 +57,23 @@ public class ClientUtils {
                         addresses.add(address);
                     }
                 } catch (IllegalArgumentException e) {
+=======
+                    if (address.isUnresolved()) {
+                        log.warn("Removing server from " + CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG + " as DNS resolution failed: " + url);
+                    } else {
+                        addresses.add(address);
+                    }
+                } catch (NumberFormatException e) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                     throw new ConfigException("Invalid port in " + CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG + ": " + url);
                 }
             }
         }
+<<<<<<< HEAD
         if (addresses.isEmpty())
+=======
+        if (addresses.size() < 1)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             throw new ConfigException("No resolvable bootstrap urls given in " + CommonClientConfigs.BOOTSTRAP_SERVERS_CONFIG);
         return addresses;
     }

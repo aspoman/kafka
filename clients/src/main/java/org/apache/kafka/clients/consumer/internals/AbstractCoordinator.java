@@ -199,6 +199,7 @@ public abstract class AbstractCoordinator implements Closeable {
     /**
      * Block until the coordinator for this group is known and is ready to receive requests.
      */
+<<<<<<< HEAD
     public synchronized void ensureCoordinatorReady() {
         // Using zero as current time since timeout is effectively infinite
         ensureCoordinatorReady(0, Long.MAX_VALUE);
@@ -213,6 +214,9 @@ public abstract class AbstractCoordinator implements Closeable {
     protected synchronized boolean ensureCoordinatorReady(long startTimeMs, long timeoutMs) {
         long remainingMs = timeoutMs;
 
+=======
+    public void ensureCoordinatorReady() {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         while (coordinatorUnknown()) {
             RequestFuture<Void> future = lookupCoordinator();
             client.poll(future, remainingMs);
@@ -234,9 +238,12 @@ public abstract class AbstractCoordinator implements Closeable {
                 time.sleep(retryBackoffMs);
             }
 
+<<<<<<< HEAD
             remainingMs = timeoutMs - (time.milliseconds() - startTimeMs);
             if (remainingMs <= 0)
                 break;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
 
         return !coordinatorUnknown();
@@ -324,10 +331,15 @@ public abstract class AbstractCoordinator implements Closeable {
         }
     }
 
+<<<<<<< HEAD
     private synchronized void disableHeartbeatThread() {
         if (heartbeatThread != null)
             heartbeatThread.disable();
     }
+=======
+        while (needRejoin()) {
+            ensureCoordinatorReady();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     private void closeHeartbeatThread() {
         HeartbeatThread thread = null;

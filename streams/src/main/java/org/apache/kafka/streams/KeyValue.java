@@ -62,7 +62,11 @@ public class KeyValue<K, V> {
     }
 
     @Override
+<<<<<<< HEAD
     public boolean equals(final Object obj) {
+=======
+    public boolean equals(Object obj) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         if (this == obj)
             return true;
 
@@ -70,9 +74,15 @@ public class KeyValue<K, V> {
             return false;
         }
 
+<<<<<<< HEAD
         final KeyValue other = (KeyValue) obj;
         return (key == null ? other.key == null : key.equals(other.key))
                 && (value == null ? other.value == null : value.equals(other.value));
+=======
+        KeyValue other = (KeyValue) obj;
+        return (this.key == null ? other.key == null : this.key.equals(other.key))
+                && (this.value == null ? other.value == null : this.value.equals(other.value));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     @Override

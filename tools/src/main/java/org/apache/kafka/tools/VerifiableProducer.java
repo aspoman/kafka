@@ -85,7 +85,11 @@ public class VerifiableProducer {
         this.topic = topic;
         this.throughput = throughput;
         this.maxMessages = maxMessages;
+<<<<<<< HEAD
         this.producer = producer;
+=======
+        this.producer = new KafkaProducer<>(producerProps);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         this.valuePrefix = valuePrefix;
     }
 
@@ -233,6 +237,7 @@ public class VerifiableProducer {
         printJson(new ShutdownComplete());
     }
 
+<<<<<<< HEAD
     @JsonPropertyOrder({ "timestamp", "name" })
     private static abstract class ProducerEvent {
         private final long timestamp = System.currentTimeMillis();
@@ -244,6 +249,12 @@ public class VerifiableProducer {
         public long timestamp() {
             return timestamp;
         }
+=======
+    String shutdownString() {
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", "shutdown_complete");
+        return toJsonString(data);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     private static class StartupComplete extends ProducerEvent {
@@ -308,6 +319,7 @@ public class VerifiableProducer {
 
     private static class FailedSend extends ProducerEvent {
 
+<<<<<<< HEAD
         private String topic;
         private String key;
         private String value;
@@ -335,6 +347,10 @@ public class VerifiableProducer {
         public String value() {
             return value;
         }
+=======
+        Map<String, Object> errorData = new HashMap<>();
+        errorData.put("name", "producer_send_error");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         @JsonProperty
         public String topic() {
@@ -371,10 +387,15 @@ public class VerifiableProducer {
             return "tool_data";
         }
 
+<<<<<<< HEAD
         @JsonProperty
         public long sent() {
             return this.sent;
         }
+=======
+        Map<String, Object> successData = new HashMap<>();
+        successData.put("name", "producer_send_success");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         @JsonProperty
         public long acked() {
@@ -425,9 +446,18 @@ public class VerifiableProducer {
 
     public void run(ThroughputThrottler throttler) {
 
+<<<<<<< HEAD
         printJson(new StartupComplete());
         // negative maxMessages (-1) means "infinite"
         long maxMessages = (this.maxMessages < 0) ? Long.MAX_VALUE : this.maxMessages;
+=======
+                Map<String, Object> data = new HashMap<>();
+                data.put("name", "tool_data");
+                data.put("sent", producer.numSent);
+                data.put("acked", producer.numAcked);
+                data.put("target_throughput", producer.throughput);
+                data.put("avg_throughput", avgThroughput);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         for (long i = 0; i < maxMessages; i++) {
             if (this.stopProducing) {

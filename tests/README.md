@@ -493,4 +493,7 @@ How do I run the unit tests?
 How can I add a unit test?
 * Follow the naming conventions - module name starts with "check", class name begins with "Check", test method name begins with "check"
 * These naming conventions are defined in "setup.cfg". We use "check" to distinguish unit tests from system tests, which use "test" in the various names.
+<<<<<<< HEAD
 
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3

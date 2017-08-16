@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -5,6 +6,15 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
+=======
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -14,13 +24,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+<<<<<<< HEAD
 package org.apache.kafka.test;
 
+=======
+
+package org.apache.kafka.test;
+
+import java.util.Map;
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.MockConsumer;
 import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.Producer;
+<<<<<<< HEAD
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.apache.kafka.streams.KafkaClientSupplier;
@@ -59,17 +78,42 @@ public class MockClientSupplier implements KafkaClientSupplier {
         }
         final MockProducer<byte[], byte[]> producer = new MockProducer<>(true, BYTE_ARRAY_SERIALIZER, BYTE_ARRAY_SERIALIZER);
         producers.add(producer);
+=======
+import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.streams.KafkaClientSupplier;
+
+public class MockClientSupplier implements KafkaClientSupplier {
+    private static final ByteArraySerializer BYTE_ARRAY_SERIALIZER = new ByteArraySerializer();
+
+    public final MockProducer<byte[], byte[]> producer =
+            new MockProducer<>(true, BYTE_ARRAY_SERIALIZER, BYTE_ARRAY_SERIALIZER);
+    public final MockConsumer<byte[], byte[]> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
+    public final MockConsumer<byte[], byte[]> restoreConsumer = new MockConsumer<>(OffsetResetStrategy.LATEST);
+
+    @Override
+    public Producer<byte[], byte[]> getProducer(Map<String, Object> config) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         return producer;
     }
 
     @Override
+<<<<<<< HEAD
     public Consumer<byte[], byte[]> getConsumer(final Map<String, Object> config) {
+=======
+    public Consumer<byte[], byte[]> getConsumer(Map<String, Object> config) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         return consumer;
     }
 
     @Override
+<<<<<<< HEAD
     public Consumer<byte[], byte[]> getRestoreConsumer(final Map<String, Object> config) {
         return restoreConsumer;
     }
 
+=======
+    public Consumer<byte[], byte[]> getRestoreConsumer(Map<String, Object> config) {
+        return restoreConsumer;
+    }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 }

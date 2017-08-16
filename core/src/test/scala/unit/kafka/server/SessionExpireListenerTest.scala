@@ -22,14 +22,23 @@ import kafka.utils.ZkUtils
 import org.I0Itec.zkclient.ZkClient
 import org.apache.zookeeper.Watcher
 import org.easymock.EasyMock
+<<<<<<< HEAD
 import org.junit.{Assert, Test}
 import Assert._
 import com.yammer.metrics.Metrics
 import com.yammer.metrics.core.Meter
+=======
+import org.junit.{Assert, Before, Test}
+import Assert._
+import com.yammer.metrics.Metrics
+import com.yammer.metrics.core.{Meter, Metric, MetricName}
+import org.apache.kafka.common.utils.MockTime
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import scala.collection.JavaConverters._
 
 class SessionExpireListenerTest {
 
+<<<<<<< HEAD
   private val brokerId = 1
 
   private def cleanMetricsRegistry() {
@@ -42,19 +51,35 @@ class SessionExpireListenerTest {
 
     cleanMetricsRegistry()
 
+=======
+  private var time = new MockTime
+  private val brokerId = 1
+
+  @Test
+  def testSessionExpireListenerMetrics() {
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     val metrics = Metrics.defaultRegistry
 
     def checkMeterCount(name: String, expected: Long) {
       val meter = metrics.allMetrics.asScala.collectFirst {
         case (metricName, meter: Meter) if metricName.getName == name => meter
       }.getOrElse(sys.error(s"Unable to find meter with name $name"))
+<<<<<<< HEAD
       assertEquals(s"Unexpected meter count for $name", expected, meter.count)
+=======
+      assertEquals("Unexpected meter count", expected, meter.count)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     val zkClient = EasyMock.mock(classOf[ZkClient])
     val zkUtils = ZkUtils(zkClient, isZkSecurityEnabled = false)
     import Watcher._
+<<<<<<< HEAD
     val healthcheck = new KafkaHealthcheck(brokerId, Seq.empty, zkUtils, None, ApiVersion.latestVersion)
+=======
+    val healthcheck = new KafkaHealthcheck(brokerId, Map.empty, zkUtils, None, ApiVersion.latestVersion)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     val expiresPerSecName = "ZooKeeperExpiresPerSec"
     val disconnectsPerSecName = "ZooKeeperDisconnectsPerSec"

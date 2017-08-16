@@ -17,7 +17,10 @@ import time
 
 from ducktape.mark import matrix
 from ducktape.mark import parametrize
+<<<<<<< HEAD
 from ducktape.mark.resource import cluster
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 from ducktape.tests.test import Test
 from ducktape.utils.util import wait_until
 

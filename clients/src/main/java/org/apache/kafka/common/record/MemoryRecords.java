@@ -273,8 +273,19 @@ public class MemoryRecords extends AbstractRecords {
     }
 
     @Override
+<<<<<<< HEAD
     public Iterable<MutableRecordBatch> batches() {
         return batches;
+=======
+    public Iterator<LogEntry> iterator() {
+        if (writable) {
+            // flip on a duplicate buffer for reading
+            return new RecordsIterator((ByteBuffer) this.buffer.duplicate().flip(), false);
+        } else {
+            // do not need to flip for non-writable buffer
+            return new RecordsIterator(this.buffer.duplicate(), false);
+        }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     @Override
@@ -295,6 +306,7 @@ public class MemoryRecords extends AbstractRecords {
         return builder.toString();
     }
 
+<<<<<<< HEAD
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -306,6 +318,58 @@ public class MemoryRecords extends AbstractRecords {
 
         return buffer.equals(that.buffer);
     }
+=======
+    public static class RecordsIterator extends AbstractIterator<LogEntry> {
+        private final ByteBuffer buffer;
+        private final DataInputStream stream;
+        private final CompressionType type;
+        private final boolean shallow;
+        private RecordsIterator innerIter;
+
+        // The variables for inner iterator
+        private final ArrayDeque<LogEntry> logEntries;
+        private final long absoluteBaseOffset;
+
+        public RecordsIterator(ByteBuffer buffer, boolean shallow) {
+            this.type = CompressionType.NONE;
+            this.buffer = buffer;
+            this.shallow = shallow;
+            this.stream = new DataInputStream(new ByteBufferInputStream(buffer));
+            this.logEntries = null;
+            this.absoluteBaseOffset = -1;
+        }
+
+        // Private constructor for inner iterator.
+        private RecordsIterator(LogEntry entry) {
+            this.type = entry.record().compressionType();
+            this.buffer = entry.record().value();
+            this.shallow = true;
+            this.stream = Compressor.wrapForInput(new ByteBufferInputStream(this.buffer), type, entry.record().magic());
+            long wrapperRecordOffset = entry.offset();
+            // If relative offset is used, we need to decompress the entire message first to compute
+            // the absolute offset.
+            if (entry.record().magic() > Record.MAGIC_VALUE_V0) {
+                this.logEntries = new ArrayDeque<>();
+                long wrapperRecordTimestamp = entry.record().timestamp();
+                while (true) {
+                    try {
+                        LogEntry logEntry = getNextEntryFromStream();
+                        Record recordWithTimestamp = new Record(logEntry.record().buffer(),
+                                                                wrapperRecordTimestamp,
+                                                                entry.record().timestampType());
+                        logEntries.add(new LogEntry(logEntry.offset(), recordWithTimestamp));
+                    } catch (EOFException e) {
+                        break;
+                    } catch (IOException e) {
+                        throw new KafkaException(e);
+                    }
+                }
+                this.absoluteBaseOffset = wrapperRecordOffset - logEntries.getLast().offset();
+            } else {
+                this.logEntries = null;
+                this.absoluteBaseOffset = -1;
+            }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     @Override
     public int hashCode() {

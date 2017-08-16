@@ -50,6 +50,7 @@ class ApiVersionsRequestTest extends BaseRequestTest {
 
   @Test
   def testApiVersionsRequestWithUnsupportedVersion() {
+<<<<<<< HEAD
     val apiVersionsRequest = new ApiVersionsRequest(0)
     val apiVersionsResponse = sendApiVersionsRequest(apiVersionsRequest, Some(Short.MaxValue), 0)
     assertEquals(Errors.UNSUPPORTED_VERSION, apiVersionsResponse.error)
@@ -58,5 +59,14 @@ class ApiVersionsRequestTest extends BaseRequestTest {
   private def sendApiVersionsRequest(request: ApiVersionsRequest, apiVersion: Option[Short] = None, responseVersion: Short = 1): ApiVersionsResponse = {
     val response = connectAndSend(request, ApiKeys.API_VERSIONS, apiVersion = apiVersion)
     ApiVersionsResponse.parse(response, responseVersion)
+=======
+    val apiVersionsResponse = sendApiVersionsRequest(new ApiVersionsRequest, Short.MaxValue)
+    assertEquals(Errors.UNSUPPORTED_VERSION.code(), apiVersionsResponse.errorCode)
+  }
+
+  private def sendApiVersionsRequest(request: ApiVersionsRequest, version: Short): ApiVersionsResponse = {
+    val response = send(request, ApiKeys.API_VERSIONS, version)
+    ApiVersionsResponse.parse(response)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
   }
 }

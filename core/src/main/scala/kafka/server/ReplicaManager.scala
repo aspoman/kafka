@@ -744,10 +744,24 @@ class ReplicaManager(val config: KafkaConfig,
       brokerTopicStats.topicStats(tp.topic).totalFetchRequestRate.mark()
       brokerTopicStats.allTopicsStats.totalFetchRequestRate.mark()
 
+<<<<<<< HEAD
       try {
         trace(s"Fetching log segment for partition $tp, offset $offset, partition fetch size $partitionFetchSize, " +
           s"remaining response limit $limitBytes" +
           (if (minOneMessage) s", ignoring response/partition size limits" else ""))
+=======
+          // decide whether to only fetch from leader
+          val localReplica = if (fetchOnlyFromLeader)
+            getLeaderReplicaIfLocal(topic, partition)
+          else
+            getReplicaOrException(topic, partition)
+
+          // decide whether to only fetch committed data (i.e. messages below high watermark)
+          val maxOffsetOpt = if (readOnlyCommitted)
+            Some(localReplica.highWatermark.messageOffset)
+          else
+            None
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         // decide whether to only fetch from leader
         val localReplica = if (fetchOnlyFromLeader)

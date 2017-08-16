@@ -20,8 +20,13 @@ from kafkatest.services.verifiable_producer import VerifiableProducer
 from kafkatest.services.console_consumer import ConsoleConsumer
 from kafkatest.utils import is_int
 from kafkatest.tests.produce_consume_validate import ProduceConsumeValidateTest
+<<<<<<< HEAD
 from ducktape.mark import parametrize, matrix
 from ducktape.mark.resource import cluster
+=======
+from ducktape.mark import parametrize
+from ducktape.mark import matrix
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 from kafkatest.services.security.kafka_acls import ACLs
 import time
 
@@ -100,10 +105,14 @@ class TestSecurityRollingUpgrade(ProduceConsumeValidateTest):
         # Bounce again with ACLs for new mechanism
         self.set_authorizer_and_bounce(security_protocol, security_protocol)
 
+<<<<<<< HEAD
     @cluster(num_nodes=8)
     @matrix(client_protocol=["SSL"])
     @cluster(num_nodes=9)
     @matrix(client_protocol=["SASL_PLAINTEXT", "SASL_SSL"])
+=======
+    @matrix(client_protocol=["SSL", "SASL_PLAINTEXT", "SASL_SSL"])
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     def test_rolling_upgrade_phase_one(self, client_protocol):
         """
         Start with a PLAINTEXT cluster, open a SECURED port, via a rolling upgrade, ensuring we could produce
@@ -147,7 +156,10 @@ class TestSecurityRollingUpgrade(ProduceConsumeValidateTest):
         #Roll in the security protocol. Disable Plaintext. Ensure we can produce and Consume throughout
         self.run_produce_consume_validate(self.roll_in_secured_settings, client_protocol, broker_protocol)
 
+<<<<<<< HEAD
     @cluster(num_nodes=9)
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     @parametrize(new_client_sasl_mechanism='PLAIN')
     def test_rolling_upgrade_sasl_mechanism_phase_one(self, new_client_sasl_mechanism):
         """
@@ -171,7 +183,10 @@ class TestSecurityRollingUpgrade(ProduceConsumeValidateTest):
         self.create_producer_and_consumer()
         self.run_produce_consume_validate(lambda: time.sleep(1))
 
+<<<<<<< HEAD
     @cluster(num_nodes=8)
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     @parametrize(new_sasl_mechanism='PLAIN')
     def test_rolling_upgrade_sasl_mechanism_phase_two(self, new_sasl_mechanism):
         """

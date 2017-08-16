@@ -27,12 +27,18 @@ import kafka.metrics.KafkaMetricsGroup
 import kafka.server.QuotaId
 import kafka.utils.{Logging, NotNothing}
 import org.apache.kafka.common.TopicPartition
+<<<<<<< HEAD
 import org.apache.kafka.common.errors.InvalidRequestException
 import org.apache.kafka.common.memory.MemoryPool
 import org.apache.kafka.common.network.{ListenerName, Send}
 import org.apache.kafka.common.protocol.{ApiKeys, Protocol, SecurityProtocol}
 import org.apache.kafka.common.record.{MemoryRecords, RecordBatch}
 import org.apache.kafka.common.requests._
+=======
+import org.apache.kafka.common.network.Send
+import org.apache.kafka.common.protocol.{ApiKeys, SecurityProtocol, Protocol}
+import org.apache.kafka.common.requests.{RequestSend, ProduceRequest, AbstractRequest, RequestHeader, ApiVersionsRequest}
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.common.security.auth.KafkaPrincipal
 import org.apache.kafka.common.utils.Time
 import org.apache.log4j.Logger
@@ -61,6 +67,7 @@ object RequestChannel extends Logging {
                 @volatile private var buffer: ByteBuffer) {
     // These need to be volatile because the readers are in the network thread and the writers are in the request
     // handler threads or the purgatory threads
+<<<<<<< HEAD
     @volatile var requestDequeueTimeNanos = -1L
     @volatile var apiLocalCompleteTimeNanos = -1L
     @volatile var responseCompleteTimeNanos = -1L
@@ -80,6 +87,53 @@ object RequestChannel extends Logging {
         // For unsupported version of ApiVersionsRequest, create a dummy request to enable an error response to be returned later
         if (header.apiKey == ApiKeys.API_VERSIONS.id && !Protocol.apiVersionSupported(header.apiKey, header.apiVersion)) {
           new RequestAndSize(new ApiVersionsRequest.Builder().build(), 0)
+=======
+    @volatile var requestDequeueTimeMs = -1L
+    @volatile var apiLocalCompleteTimeMs = -1L
+    @volatile var responseCompleteTimeMs = -1L
+    @volatile var responseDequeueTimeMs = -1L
+    @volatile var apiRemoteCompleteTimeMs = -1L
+
+    val requestId = buffer.getShort()
+
+    // TODO: this will be removed once we migrated to client-side format
+    // for server-side request / response format
+    // NOTE: this map only includes the server-side request/response handlers. Newer
+    // request types should only use the client-side versions which are parsed with
+    // o.a.k.common.requests.AbstractRequest.getRequest()
+    private val keyToNameAndDeserializerMap: Map[Short, (ByteBuffer) => RequestOrResponse]=
+      Map(ApiKeys.FETCH.id -> FetchRequest.readFrom,
+        ApiKeys.CONTROLLED_SHUTDOWN_KEY.id -> ControlledShutdownRequest.readFrom
+      )
+
+    // TODO: this will be removed once we migrated to client-side format
+    val requestObj =
+      keyToNameAndDeserializerMap.get(requestId).map(readFrom => readFrom(buffer)).orNull
+
+    // if we failed to find a server-side mapping, then try using the
+    // client-side request / response format
+    val header: RequestHeader =
+      if (requestObj == null) {
+        buffer.rewind
+        try RequestHeader.parse(buffer)
+        catch {
+          case ex: Throwable =>
+            throw new InvalidRequestException(s"Error parsing request header. Our best guess of the apiKey is: $requestId", ex)
+        }
+      } else
+        null
+    val body: AbstractRequest =
+      if (requestObj == null)
+        try {
+          // For unsupported version of ApiVersionsRequest, create a dummy request to enable an error response to be returned later
+          if (header.apiKey == ApiKeys.API_VERSIONS.id && !Protocol.apiVersionSupported(header.apiKey, header.apiVersion))
+            new ApiVersionsRequest
+          else
+            AbstractRequest.getRequest(header.apiKey, header.apiVersion, buffer)
+        } catch {
+          case ex: Throwable =>
+            throw new InvalidRequestException(s"Error getting request for apiKey: ${header.apiKey} and apiVersion: ${header.apiVersion}", ex)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
         else
           AbstractRequest.getRequest(header.apiKey, header.apiVersion, buffer)

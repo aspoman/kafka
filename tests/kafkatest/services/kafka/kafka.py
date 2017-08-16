@@ -18,6 +18,10 @@ import json
 import os.path
 import re
 import signal
+<<<<<<< HEAD
+=======
+import subprocess
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import time
 
 from ducktape.services.service import Service
@@ -30,7 +34,11 @@ from kafkatest.services.kafka import config_property
 from kafkatest.services.monitor.jmx import JmxMixin
 from kafkatest.services.security.minikdc import MiniKdc
 from kafkatest.services.security.security_config import SecurityConfig
+<<<<<<< HEAD
 from kafkatest.version import DEV_BRANCH
+=======
+from kafkatest.version import TRUNK
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 Port = collections.namedtuple('Port', ['name', 'number', 'open'])
 
@@ -72,8 +80,13 @@ class KafkaService(KafkaPathResolverMixin, JmxMixin, Service):
 
     def __init__(self, context, num_nodes, zk, security_protocol=SecurityConfig.PLAINTEXT, interbroker_security_protocol=SecurityConfig.PLAINTEXT,
                  client_sasl_mechanism=SecurityConfig.SASL_MECHANISM_GSSAPI, interbroker_sasl_mechanism=SecurityConfig.SASL_MECHANISM_GSSAPI,
+<<<<<<< HEAD
                  authorizer_class_name=None, topics=None, version=DEV_BRANCH, jmx_object_names=None,
                  jmx_attributes=None, zk_connect_timeout=5000, zk_session_timeout=6000, server_prop_overides=[]):
+=======
+                 authorizer_class_name=None, topics=None, version=TRUNK, quota_config=None, jmx_object_names=None,
+                 jmx_attributes=[], zk_connect_timeout=5000, zk_session_timeout=6000):
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         """
         :type context
         :type zk: ZookeeperService
@@ -91,10 +104,13 @@ class KafkaService(KafkaPathResolverMixin, JmxMixin, Service):
         self.topics = topics
         self.minikdc = None
         self.authorizer_class_name = authorizer_class_name
+<<<<<<< HEAD
         self.zk_set_acl = False
         self.server_prop_overides = server_prop_overides
         self.log_level = "DEBUG"
         self.num_nodes = num_nodes
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         #
         # In a heavily loaded and not very fast machine, it is
@@ -210,8 +226,13 @@ class KafkaService(KafkaPathResolverMixin, JmxMixin, Service):
         cmd += "%s %s 1>> %s 2>> %s &" % \
                (self.path.script("kafka-server-start.sh", node),
                 KafkaService.CONFIG_FILE,
+<<<<<<< HEAD
                 KafkaService.STDOUT_STDERR_CAPTURE,
                 KafkaService.STDOUT_STDERR_CAPTURE)
+=======
+                KafkaService.STDOUT_CAPTURE,
+                KafkaService.STDERR_CAPTURE)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         return cmd
 
     def start_node(self, node):
@@ -281,12 +302,20 @@ class KafkaService(KafkaPathResolverMixin, JmxMixin, Service):
         """
         if node is None:
             node = self.nodes[0]
+<<<<<<< HEAD
         self.logger.info("Creating topic %s with settings %s",
                          topic_cfg["topic"], topic_cfg)
         kafka_topic_script = self.path.script("kafka-topics.sh", node)
 
         cmd = kafka_topic_script + " "
         cmd += "--zookeeper %(zk_connect)s --create --topic %(topic)s " % {
+=======
+        self.logger.info("Creating topic %s with settings %s", topic_cfg["topic"], topic_cfg)
+        kafka_topic_script = self.path.script("kafka-topics.sh", node)
+
+        cmd = kafka_topic_script + " "
+        cmd += "--zookeeper %(zk_connect)s --create --topic %(topic)s --partitions %(partitions)d --replication-factor %(replication)d" % {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 'zk_connect': self.zk.connect_setting(),
                 'topic': topic_cfg.get("topic"),
            }

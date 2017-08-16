@@ -28,8 +28,12 @@ import org.apache.kafka.common.Cluster;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.clients.consumer.RetriableCommitFailedException;
 import org.apache.kafka.common.errors.GroupAuthorizationException;
+<<<<<<< HEAD
 import org.apache.kafka.common.errors.InterruptException;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.common.errors.RetriableException;
 import org.apache.kafka.common.errors.TopicAuthorizationException;
 import org.apache.kafka.common.errors.WakeupException;
@@ -514,6 +518,7 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
         }
     }
 
+<<<<<<< HEAD
     public void commitOffsetsAsync(final Map<TopicPartition, OffsetAndMetadata> offsets, final OffsetCommitCallback callback) {
         invokeCompletedOffsetCommitCallbacks();
 
@@ -550,6 +555,10 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
     }
 
     private void doCommitOffsetsAsync(final Map<TopicPartition, OffsetAndMetadata> offsets, final OffsetCommitCallback callback) {
+=======
+
+    public void commitOffsetsAsync(final Map<TopicPartition, OffsetAndMetadata> offsets, OffsetCommitCallback callback) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         this.subscriptions.needRefreshCommits();
         RequestFuture<Void> future = sendOffsetCommitRequest(offsets);
         final OffsetCommitCallback cb = callback == null ? defaultOffsetCommitCallback : callback;
@@ -564,6 +573,7 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
 
             @Override
             public void onFailure(RuntimeException e) {
+<<<<<<< HEAD
                 Exception commitException = e;
 
                 if (e instanceof RetriableException)
@@ -572,6 +582,20 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
                 completedOffsetCommits.add(new OffsetCommitCompletion(cb, offsets, commitException));
             }
         });
+=======
+                if (e instanceof RetriableException) {
+                    cb.onComplete(offsets, new RetriableCommitFailedException("Commit offsets failed with retriable exception. You should retry committing offsets.", e));
+                } else {
+                    cb.onComplete(offsets, e);
+                }
+            }
+        });
+
+        // ensure the commit has a chance to be transmitted (without blocking on its completion).
+        // Note that commits are treated as heartbeats by the coordinator, so there is no need to
+        // explicitly allow heartbeats through delayed task execution.
+        client.pollNoWakeup();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /**
@@ -590,6 +614,7 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
         if (offsets.isEmpty())
             return true;
 
+<<<<<<< HEAD
         long now = time.milliseconds();
         long startMs = now;
         long remainingMs = timeoutMs;
@@ -600,6 +625,10 @@ public final class ConsumerCoordinator extends AbstractCoordinator {
 
                 remainingMs = timeoutMs - (time.milliseconds() - startMs);
             }
+=======
+        while (true) {
+            ensureCoordinatorReady();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
             RequestFuture<Void> future = sendOffsetCommitRequest(offsets);
             client.poll(future, remainingMs);

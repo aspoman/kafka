@@ -49,6 +49,12 @@ class ProduceConsumeValidateTest(Test):
 
     def start_producer_and_consumer(self):
         # Start background producer and consumer
+<<<<<<< HEAD
+=======
+        self.producer.start()
+        wait_until(lambda: self.producer.num_acked > 5, timeout_sec=20,
+             err_msg="Producer failed to start in a reasonable amount of time.")
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         self.consumer.start()
         if (self.consumer_init_timeout_sec > 0):
             self.logger.debug("Waiting %ds for the consumer to initialize.",

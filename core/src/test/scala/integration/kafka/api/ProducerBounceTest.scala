@@ -56,7 +56,33 @@ class ProducerBounceTest extends KafkaServerTestHarness {
       .map(KafkaConfig.fromProps(_, overridingProps))
   }
 
+<<<<<<< HEAD
   private val topic1 = "topic-1"
+=======
+  private var producer1: KafkaProducer[Array[Byte],Array[Byte]] = null
+  private var producer2: KafkaProducer[Array[Byte],Array[Byte]] = null
+  private var producer3: KafkaProducer[Array[Byte],Array[Byte]] = null
+
+  private val topic1 = "topic-1"
+
+  @Before
+  override def setUp() {
+    super.setUp()
+
+    producer1 = TestUtils.createNewProducer(brokerList, acks = 0, bufferSize = producerBufferSize)
+    producer2 = TestUtils.createNewProducer(brokerList, acks = 1, bufferSize = producerBufferSize)
+    producer3 = TestUtils.createNewProducer(brokerList, acks = -1, bufferSize = producerBufferSize)
+  }
+
+  @After
+  override def tearDown() {
+    if (producer1 != null) producer1.close
+    if (producer2 != null) producer2.close
+    if (producer3 != null) producer3.close
+
+    super.tearDown()
+  }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
   /**
    * With replication, producer should able able to find new leader after it detects broker failure

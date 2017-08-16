@@ -934,10 +934,16 @@ public class DistributedHerderTest {
         // join
         expectRebalance(1, Arrays.asList(CONN1), Collections.<ConnectorTaskId>emptyList());
         expectPostRebalanceCatchup(SNAPSHOT);
+<<<<<<< HEAD
         worker.startConnector(EasyMock.eq(CONN1), EasyMock.<Map<String, String>>anyObject(), EasyMock.<ConnectorContext>anyObject(),
                 EasyMock.eq(herder), EasyMock.eq(TargetState.STARTED));
         PowerMock.expectLastCall().andReturn(true);
         EasyMock.expect(worker.getPlugins()).andReturn(plugins);
+=======
+        worker.startConnector(EasyMock.<ConnectorConfig>anyObject(), EasyMock.<ConnectorContext>anyObject(),
+                EasyMock.eq(herder), EasyMock.eq(TargetState.STARTED));
+        PowerMock.expectLastCall();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         EasyMock.expect(worker.isRunning(CONN1)).andReturn(true);
         EasyMock.expect(worker.connectorTaskConfigs(CONN1, MAX_TASKS, null)).andReturn(TASK_CONFIGS);
         member.poll(EasyMock.anyInt());
@@ -948,9 +954,17 @@ public class DistributedHerderTest {
         member.ensureActive();
         PowerMock.expectLastCall();
 
+<<<<<<< HEAD
         EasyMock.expect(configBackingStore.snapshot()).andReturn(SNAPSHOT_PAUSED_CONN1);
         PowerMock.expectLastCall();
 
+=======
+        EasyMock.expect(configStorage.snapshot()).andReturn(SNAPSHOT_PAUSED_CONN1);
+        PowerMock.expectLastCall();
+
+        EasyMock.expect(worker.ownsConnector(CONN1)).andReturn(true);
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         worker.setTargetState(CONN1, TargetState.PAUSED);
         PowerMock.expectLastCall();
 
@@ -974,10 +988,16 @@ public class DistributedHerderTest {
         // start with the connector paused
         expectRebalance(1, Arrays.asList(CONN1), Collections.<ConnectorTaskId>emptyList());
         expectPostRebalanceCatchup(SNAPSHOT_PAUSED_CONN1);
+<<<<<<< HEAD
         worker.startConnector(EasyMock.eq(CONN1), EasyMock.<Map<String, String>>anyObject(), EasyMock.<ConnectorContext>anyObject(),
                 EasyMock.eq(herder), EasyMock.eq(TargetState.PAUSED));
         PowerMock.expectLastCall().andReturn(true);
         EasyMock.expect(worker.getPlugins()).andReturn(plugins);
+=======
+        worker.startConnector(EasyMock.<ConnectorConfig>anyObject(), EasyMock.<ConnectorContext>anyObject(),
+                EasyMock.eq(herder), EasyMock.eq(TargetState.PAUSED));
+        PowerMock.expectLastCall();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         member.poll(EasyMock.anyInt());
         PowerMock.expectLastCall();
@@ -987,10 +1007,18 @@ public class DistributedHerderTest {
         member.ensureActive();
         PowerMock.expectLastCall();
 
+<<<<<<< HEAD
         EasyMock.expect(configBackingStore.snapshot()).andReturn(SNAPSHOT);
         PowerMock.expectLastCall();
 
         // we expect reconfiguration after resuming
+=======
+        EasyMock.expect(configStorage.snapshot()).andReturn(SNAPSHOT);
+        PowerMock.expectLastCall();
+
+        // we expect reconfiguration after resuming
+        EasyMock.expect(worker.ownsConnector(CONN1)).andReturn(true);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         EasyMock.expect(worker.isRunning(CONN1)).andReturn(true);
         EasyMock.expect(worker.connectorTaskConfigs(CONN1, MAX_TASKS, null)).andReturn(TASK_CONFIGS);
 
@@ -1015,11 +1043,18 @@ public class DistributedHerderTest {
         EasyMock.expect(worker.connectorNames()).andStubReturn(Collections.singleton(CONN1));
 
         // join
+<<<<<<< HEAD
         expectRebalance(1, Collections.<String>emptyList(), singletonList(TASK0));
         expectPostRebalanceCatchup(SNAPSHOT);
         worker.startTask(EasyMock.eq(TASK0), EasyMock.<Map<String, String>>anyObject(), EasyMock.<Map<String, String>>anyObject(),
                 EasyMock.eq(herder), EasyMock.eq(TargetState.STARTED));
         PowerMock.expectLastCall().andReturn(true);
+=======
+        expectRebalance(1, Collections.<String>emptyList(), Collections.singletonList(TASK0));
+        expectPostRebalanceCatchup(SNAPSHOT);
+        worker.startTask(EasyMock.eq(TASK0), EasyMock.<TaskConfig>anyObject(), EasyMock.eq(herder), EasyMock.eq(TargetState.STARTED));
+        PowerMock.expectLastCall();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         member.poll(EasyMock.anyInt());
         PowerMock.expectLastCall();
 
@@ -1028,7 +1063,11 @@ public class DistributedHerderTest {
         member.ensureActive();
         PowerMock.expectLastCall();
 
+<<<<<<< HEAD
         EasyMock.expect(configBackingStore.snapshot()).andReturn(SNAPSHOT);
+=======
+        EasyMock.expect(configStorage.snapshot()).andReturn(SNAPSHOT);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         PowerMock.expectLastCall();
 
         member.poll(EasyMock.anyInt());
@@ -1052,11 +1091,18 @@ public class DistributedHerderTest {
         EasyMock.expect(worker.connectorNames()).andStubReturn(Collections.<String>emptySet());
 
         // join
+<<<<<<< HEAD
         expectRebalance(1, Collections.<String>emptyList(), singletonList(TASK0));
         expectPostRebalanceCatchup(SNAPSHOT);
         worker.startTask(EasyMock.eq(TASK0), EasyMock.<Map<String, String>>anyObject(), EasyMock.<Map<String, String>>anyObject(),
                 EasyMock.eq(herder), EasyMock.eq(TargetState.STARTED));
         PowerMock.expectLastCall().andReturn(true);
+=======
+        expectRebalance(1, Collections.<String>emptyList(), Collections.singletonList(TASK0));
+        expectPostRebalanceCatchup(SNAPSHOT);
+        worker.startTask(EasyMock.eq(TASK0), EasyMock.<TaskConfig>anyObject(), EasyMock.eq(herder), EasyMock.eq(TargetState.STARTED));
+        PowerMock.expectLastCall();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         member.poll(EasyMock.anyInt());
         PowerMock.expectLastCall();
 
@@ -1065,9 +1111,17 @@ public class DistributedHerderTest {
         member.ensureActive();
         PowerMock.expectLastCall();
 
+<<<<<<< HEAD
         EasyMock.expect(configBackingStore.snapshot()).andReturn(SNAPSHOT_PAUSED_CONN1);
         PowerMock.expectLastCall();
 
+=======
+        EasyMock.expect(configStorage.snapshot()).andReturn(SNAPSHOT_PAUSED_CONN1);
+        PowerMock.expectLastCall();
+
+        EasyMock.expect(worker.ownsConnector(CONN1)).andReturn(false);
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         worker.setTargetState(CONN1, TargetState.PAUSED);
         PowerMock.expectLastCall();
 
@@ -1092,11 +1146,18 @@ public class DistributedHerderTest {
         EasyMock.expect(worker.connectorNames()).andStubReturn(Collections.<String>emptySet());
 
         // join
+<<<<<<< HEAD
         expectRebalance(1, Collections.<String>emptyList(), singletonList(TASK0));
         expectPostRebalanceCatchup(SNAPSHOT_PAUSED_CONN1);
         worker.startTask(EasyMock.eq(TASK0), EasyMock.<Map<String, String>>anyObject(), EasyMock.<Map<String, String>>anyObject(),
                 EasyMock.eq(herder), EasyMock.eq(TargetState.PAUSED));
         PowerMock.expectLastCall().andReturn(true);
+=======
+        expectRebalance(1, Collections.<String>emptyList(), Collections.singletonList(TASK0));
+        expectPostRebalanceCatchup(SNAPSHOT_PAUSED_CONN1);
+        worker.startTask(EasyMock.eq(TASK0), EasyMock.<TaskConfig>anyObject(), EasyMock.eq(herder), EasyMock.eq(TargetState.PAUSED));
+        PowerMock.expectLastCall();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         member.poll(EasyMock.anyInt());
         PowerMock.expectLastCall();
 
@@ -1105,6 +1166,7 @@ public class DistributedHerderTest {
         member.ensureActive();
         PowerMock.expectLastCall();
 
+<<<<<<< HEAD
         EasyMock.expect(configBackingStore.snapshot()).andReturn(SNAPSHOT);
         PowerMock.expectLastCall();
 
@@ -1113,6 +1175,16 @@ public class DistributedHerderTest {
 
         EasyMock.expect(worker.isRunning(CONN1)).andReturn(false);
 
+=======
+        EasyMock.expect(configStorage.snapshot()).andReturn(SNAPSHOT);
+        PowerMock.expectLastCall();
+
+        EasyMock.expect(worker.ownsConnector(CONN1)).andReturn(false);
+
+        worker.setTargetState(CONN1, TargetState.STARTED);
+        PowerMock.expectLastCall();
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         member.poll(EasyMock.anyInt());
         PowerMock.expectLastCall();
 

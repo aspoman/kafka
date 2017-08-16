@@ -45,7 +45,11 @@ public class RangeAssignor extends AbstractPartitionAssignor {
         return "range";
     }
 
+<<<<<<< HEAD
     private Map<String, List<String>> consumersPerTopic(Map<String, Subscription> consumerMetadata) {
+=======
+    private Map<String, List<String>> consumersPerTopic(Map<String, List<String>> consumerMetadata) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         Map<String, List<String>> res = new HashMap<>();
         for (Map.Entry<String, Subscription> subscriptionEntry : consumerMetadata.entrySet()) {
             String consumerId = subscriptionEntry.getKey();

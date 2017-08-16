@@ -31,6 +31,7 @@ import org.apache.kafka.common.metrics.MetricsReporter;
 import org.apache.kafka.common.metrics.Sensor;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.utils.Time;
+<<<<<<< HEAD
 import org.apache.kafka.streams.errors.InvalidStateStoreException;
 import org.apache.kafka.streams.errors.StreamsException;
 import org.apache.kafka.streams.kstream.KStream;
@@ -44,6 +45,10 @@ import org.apache.kafka.streams.processor.internals.GlobalStreamThread;
 import org.apache.kafka.streams.processor.internals.InternalTopologyBuilder;
 import org.apache.kafka.streams.processor.internals.ProcessorTopology;
 import org.apache.kafka.streams.processor.internals.StateDirectory;
+=======
+import org.apache.kafka.streams.processor.TopologyBuilder;
+import org.apache.kafka.streams.processor.internals.DefaultKafkaClientSupplier;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.apache.kafka.streams.processor.internals.StreamThread;
 import org.apache.kafka.streams.processor.internals.StreamsKafkaClient;
 import org.apache.kafka.streams.processor.internals.StreamsMetadataState;
@@ -135,7 +140,10 @@ public class KafkaStreams {
     private final ScheduledExecutorService stateDirCleaner;
     private final StreamThread[] threads;
     private final Metrics metrics;
+<<<<<<< HEAD
     private final QueryableStoreProvider queryableStoreProvider;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
     // processId is expected to be unique across JVMs and to be used
     // in userData of the subscription request to allow assignor be aware
@@ -469,9 +477,14 @@ public class KafkaStreams {
      * @param topology the topology specifying the computational logic
      * @param config  the Kafka Streams configuration
      */
+<<<<<<< HEAD
     public KafkaStreams(final Topology topology,
                         final StreamsConfig config) {
         this(topology.internalTopologyBuilder, config, new DefaultKafkaClientSupplier());
+=======
+    public KafkaStreams(TopologyBuilder builder, Properties props) {
+        this(builder, new StreamsConfig(props), new DefaultKafkaClientSupplier());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     /**
@@ -482,6 +495,7 @@ public class KafkaStreams {
      * @param clientSupplier the Kafka clients supplier which provides underlying producer and consumer clients
      *                       for the new {@code KafkaStreams} instance
      */
+<<<<<<< HEAD
     public KafkaStreams(final Topology topology,
                         final StreamsConfig config,
                         final KafkaClientSupplier clientSupplier) {
@@ -491,6 +505,21 @@ public class KafkaStreams {
     private KafkaStreams(final InternalTopologyBuilder internalTopologyBuilder,
                          final StreamsConfig config,
                          final KafkaClientSupplier clientSupplier) {
+=======
+    public KafkaStreams(TopologyBuilder builder, StreamsConfig config) {
+        this(builder, config, new DefaultKafkaClientSupplier());
+    }
+
+    /**
+     * Construct the stream instance.
+     *
+     * @param builder         the processor topology builder specifying the computational logic
+     * @param config          the stream configs
+     * @param clientSupplier  the kafka clients supplier which provides underlying producer and consumer clients
+     * for this {@link KafkaStreams} instance
+     */
+    public KafkaStreams(TopologyBuilder builder, StreamsConfig config, KafkaClientSupplier clientSupplier) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         // create the metrics
         final Time time = Time.SYSTEM;
 
@@ -518,6 +547,7 @@ public class KafkaStreams {
             .timeWindow(config.getLong(StreamsConfig.METRICS_SAMPLE_WINDOW_MS_CONFIG),
                 TimeUnit.MILLISECONDS);
 
+<<<<<<< HEAD
         metrics = new Metrics(metricConfig, reporters, time);
 
         threads = new StreamThread[config.getInt(StreamsConfig.NUM_STREAM_THREADS_CONFIG)];
@@ -595,6 +625,13 @@ public class KafkaStreams {
 
         if (host == null || port == null) {
             throw new ConfigException(String.format("Error parsing host address %s. Expected format host:port.", endPoint));
+=======
+        this.metrics = new Metrics(metricConfig, reporters, time);
+
+        this.threads = new StreamThread[config.getInt(StreamsConfig.NUM_STREAM_THREADS_CONFIG)];
+        for (int i = 0; i < this.threads.length; i++) {
+            this.threads[i] = new StreamThread(builder, config, clientSupplier, applicationId, clientId, processId, metrics, time);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
 
         return new HostInfo(host, port);
@@ -646,8 +683,16 @@ public class KafkaStreams {
         validateStartOnce();
         checkBrokerVersionCompatibility();
 
+<<<<<<< HEAD
         if (globalStreamThread != null) {
             globalStreamThread.start();
+=======
+            log.info("Started Kafka Stream process");
+        } else if (state == RUNNING) {
+            throw new IllegalStateException("This process was already started.");
+        } else {
+            throw new IllegalStateException("Cannot restart after closing.");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
 
         for (final StreamThread thread : threads) {
@@ -698,6 +743,7 @@ public class KafkaStreams {
                     Thread.interrupted();
                 }
             }
+<<<<<<< HEAD
             globalStreamThread = null;
         }
     }
@@ -852,7 +898,16 @@ public class KafkaStreams {
             } else {
                 throw new IllegalStateException("Can only set the GlobalRestoreListener in the CREATED state");
             }
+=======
         }
+
+        if (state != STOPPED) {
+            metrics.close();
+            state = STOPPED;
+            log.info("Stopped Kafka Stream process");
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
+        }
+
     }
 
     /**

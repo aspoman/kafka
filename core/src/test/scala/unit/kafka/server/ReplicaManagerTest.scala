@@ -21,7 +21,14 @@ import java.io.File
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicBoolean
 
+<<<<<<< HEAD
 import kafka.log.LogConfig
+=======
+import kafka.api.{FetchResponsePartitionData, PartitionFetchInfo}
+import kafka.cluster.Broker
+import kafka.common.TopicAndPartition
+import kafka.message.{MessageSet, ByteBufferMessageSet, Message}
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import kafka.utils.{MockScheduler, MockTime, TestUtils, ZkUtils}
 import TestUtils.createBroker
 import kafka.utils.timer.MockTimer
@@ -35,8 +42,13 @@ import org.apache.kafka.common.requests.FetchRequest.PartitionData
 import org.apache.kafka.common.requests.FetchResponse.AbortedTransaction
 import org.apache.kafka.common.{Node, TopicPartition}
 import org.easymock.EasyMock
+<<<<<<< HEAD
 import org.junit.Assert._
 import org.junit.{After, Before, Test}
+=======
+import org.junit.Assert.{assertEquals, assertTrue}
+import org.junit.{Test, Before, After}
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 import scala.collection.JavaConverters._
 import scala.collection.Map
@@ -353,6 +365,7 @@ class ReplicaManagerTest {
       partition.getOrCreateReplica(0)
 
       // Make this replica the leader.
+<<<<<<< HEAD
       val leaderAndIsrRequest1 = new LeaderAndIsrRequest.Builder(ApiKeys.LEADER_AND_ISR.latestVersion, 0, 0,
         collection.immutable.Map(new TopicPartition(topic, 0) -> new LeaderAndIsrRequest.PartitionState(0, 0, 0, brokerList, 0, brokerList, false)).asJava,
         Set(new Node(0, "host1", 0), new Node(1, "host2", 1), new Node(2, "host2", 2)).asJava).build()
@@ -365,9 +378,36 @@ class ReplicaManagerTest {
         appendRecords(rm, new TopicPartition(topic, 0), records).onFire { response =>
           assertEquals(Errors.NONE, response.error)
         }
+=======
+      val leaderAndIsrRequest1 = new LeaderAndIsrRequest(0, 0,
+        collection.immutable.Map(new TopicPartition(topic, 0) -> new PartitionState(0, 0, 0, brokerList, 0, brokerSet)).asJava,
+        Set(new Node(0, "host1", 0), new Node(1, "host2", 1), new Node(2, "host2", 2)).asJava)
+      rm.becomeLeaderOrFollower(0, leaderAndIsrRequest1, metadataCache, (_, _) => {})
+      rm.getLeaderReplicaIfLocal(topic, 0)
+
+      def produceCallback(responseStatus: Map[TopicPartition, PartitionResponse]) = {}
+      
+      // Append a couple of messages.
+      for(i <- 1 to 2)
+        rm.appendMessages(
+          timeout = 1000,
+          requiredAcks = -1,
+          internalTopicsAllowed = false,
+          messagesPerPartition = Map(new TopicPartition(topic, 0) -> new ByteBufferMessageSet(new Message("message %d".format(i).getBytes))),
+          responseCallback = produceCallback)
+      
+      var fetchCallbackFired = false
+      var fetchError = 0
+      var fetchedMessages: MessageSet = null
+      def fetchCallback(responseStatus: Map[TopicAndPartition, FetchResponsePartitionData]) = {
+        fetchError = responseStatus.values.head.error
+        fetchedMessages = responseStatus.values.head.messages
+        fetchCallbackFired = true
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
       }
 
       // Fetch a message above the high watermark as a follower
+<<<<<<< HEAD
       val followerFetchResult = fetchAsFollower(rm, new TopicPartition(topic, 0), new PartitionData(1, 0, 100000))
       val followerFetchData = followerFetchResult.assertFired
       assertEquals("Should not give an exception", Errors.NONE, followerFetchData.error)
@@ -378,6 +418,32 @@ class ReplicaManagerTest {
       val consumerFetchData = consumerFetchResult.assertFired
       assertEquals("Should not give an exception", Errors.NONE, consumerFetchData.error)
       assertEquals("Should return empty response", MemoryRecords.EMPTY, consumerFetchData.records)
+=======
+      rm.fetchMessages(
+        timeout = 1000,
+        replicaId = 1,
+        fetchMinBytes = 0,
+        fetchInfo = collection.immutable.Map(new TopicAndPartition(topic, 0) -> new PartitionFetchInfo(1, 100000)),
+        responseCallback = fetchCallback)
+        
+      
+      assertTrue(fetchCallbackFired)
+      assertEquals("Should not give an exception", Errors.NONE.code, fetchError)
+      assertTrue("Should return some data", fetchedMessages.iterator.hasNext)
+      fetchCallbackFired = false
+      
+      // Fetch a message above the high watermark as a consumer
+      rm.fetchMessages(
+        timeout = 1000,
+        replicaId = -1,
+        fetchMinBytes = 0,
+        fetchInfo = collection.immutable.Map(new TopicAndPartition(topic, 0) -> new PartitionFetchInfo(1, 100000)),
+        responseCallback = fetchCallback)
+          
+        assertTrue(fetchCallbackFired)
+        assertEquals("Should not give an exception", Errors.NONE.code, fetchError)
+        assertEquals("Should return empty response", MessageSet.Empty, fetchedMessages)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     } finally {
       rm.shutdown(checkpointHW = false)
     }

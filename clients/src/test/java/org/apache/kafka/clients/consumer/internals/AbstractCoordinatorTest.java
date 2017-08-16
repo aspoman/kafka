@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -8,18 +9,35 @@
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
+=======
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+<<<<<<< HEAD
  */
+=======
+ **/
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 package org.apache.kafka.clients.consumer.internals;
 
 import org.apache.kafka.clients.Metadata;
 import org.apache.kafka.clients.MockClient;
 import org.apache.kafka.common.Cluster;
 import org.apache.kafka.common.Node;
+<<<<<<< HEAD
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.metrics.Metrics;
 import org.apache.kafka.common.protocol.Errors;
@@ -35,6 +53,17 @@ import org.apache.kafka.common.utils.MockTime;
 import org.apache.kafka.common.utils.Time;
 import org.apache.kafka.test.TestCondition;
 import org.apache.kafka.test.TestUtils;
+=======
+import org.apache.kafka.common.metrics.Metrics;
+import org.apache.kafka.common.protocol.Errors;
+import org.apache.kafka.common.protocol.types.Struct;
+import org.apache.kafka.common.requests.GroupCoordinatorResponse;
+import org.apache.kafka.common.requests.JoinGroupRequest;
+import org.apache.kafka.common.utils.MockTime;
+import org.apache.kafka.common.utils.Time;
+import org.apache.kafka.test.TestUtils;
+import org.junit.Before;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -42,6 +71,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+<<<<<<< HEAD
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -50,15 +80,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+=======
+
+import static org.junit.Assert.assertTrue;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 public class AbstractCoordinatorTest {
 
     private static final ByteBuffer EMPTY_DATA = ByteBuffer.wrap(new byte[0]);
+<<<<<<< HEAD
     private static final int REBALANCE_TIMEOUT_MS = 60000;
     private static final int SESSION_TIMEOUT_MS = 10000;
     private static final int HEARTBEAT_INTERVAL_MS = 3000;
     private static final long RETRY_BACKOFF_MS = 20;
     private static final long LONG_RETRY_BACKOFF_MS = 10000;
+=======
+    private static final int SESSION_TIMEOUT_MS = 30000;
+    private static final int HEARTBEAT_INTERVAL_MS = 3000;
+    private static final long RETRY_BACKOFF_MS = 100;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     private static final long REQUEST_TIMEOUT_MS = 40000;
     private static final String GROUP_ID = "dummy-group";
     private static final String METRIC_GROUP_PREFIX = "consumer";
@@ -70,6 +110,7 @@ public class AbstractCoordinatorTest {
     private ConsumerNetworkClient consumerClient;
     private DummyCoordinator coordinator;
 
+<<<<<<< HEAD
     private void setupCoordinator(long retryBackoffMs) {
         this.mockTime = new MockTime();
         this.mockClient = new MockClient(mockTime);
@@ -81,6 +122,20 @@ public class AbstractCoordinatorTest {
 
         Cluster cluster = TestUtils.singletonCluster("topic", 1);
         metadata.update(cluster, Collections.<String>emptySet(), mockTime.milliseconds());
+=======
+    @Before
+    public void setupCoordinator() {
+        this.mockTime = new MockTime();
+        this.mockClient = new MockClient(mockTime);
+
+        Metadata metadata = new Metadata();
+        this.consumerClient = new ConsumerNetworkClient(mockClient, metadata, mockTime,
+                RETRY_BACKOFF_MS, REQUEST_TIMEOUT_MS);
+        Metrics metrics = new Metrics();
+
+        Cluster cluster = TestUtils.singletonCluster("topic", 1);
+        metadata.update(cluster, mockTime.milliseconds());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         this.node = cluster.nodes().get(0);
         mockClient.setNode(node);
 
@@ -90,6 +145,7 @@ public class AbstractCoordinatorTest {
 
     @Test
     public void testCoordinatorDiscoveryBackoff() {
+<<<<<<< HEAD
         setupCoordinator(RETRY_BACKOFF_MS);
 
         mockClient.prepareResponse(groupCoordinatorResponse(node, Errors.NONE));
@@ -98,6 +154,14 @@ public class AbstractCoordinatorTest {
         // blackout the coordinator for 10 milliseconds to simulate a disconnect.
         // after backing off, we should be able to connect.
         mockClient.blackout(coordinatorNode, 10L);
+=======
+        mockClient.prepareResponse(groupCoordinatorResponse(node, Errors.NONE.code()));
+        mockClient.prepareResponse(groupCoordinatorResponse(node, Errors.NONE.code()));
+
+        // blackout the coordinator for 50 milliseconds to simulate a disconnect.
+        // after backing off, we should be able to connect.
+        mockClient.blackout(coordinatorNode, 50L);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         long initialTime = mockTime.milliseconds();
         coordinator.ensureCoordinatorReady();
@@ -106,6 +170,7 @@ public class AbstractCoordinatorTest {
         assertTrue(endTime - initialTime >= RETRY_BACKOFF_MS);
     }
 
+<<<<<<< HEAD
     @Test
     public void testUncaughtExceptionInHeartbeatThread() throws Exception {
         setupCoordinator(RETRY_BACKOFF_MS);
@@ -564,12 +629,25 @@ public class AbstractCoordinatorTest {
         private int onJoinPrepareInvokes = 0;
         private int onJoinCompleteInvokes = 0;
         private boolean wakeupOnJoinComplete = false;
+=======
+    private Struct groupCoordinatorResponse(Node node, short error) {
+        GroupCoordinatorResponse response = new GroupCoordinatorResponse(error, node);
+        return response.toStruct();
+    }
+
+    public class DummyCoordinator extends AbstractCoordinator {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         public DummyCoordinator(ConsumerNetworkClient client,
                                 Metrics metrics,
                                 Time time) {
+<<<<<<< HEAD
             super(client, GROUP_ID, REBALANCE_TIMEOUT_MS, SESSION_TIMEOUT_MS, HEARTBEAT_INTERVAL_MS, metrics,
                   METRIC_GROUP_PREFIX, time, RETRY_BACKOFF_MS, false);
+=======
+            super(client, GROUP_ID, SESSION_TIMEOUT_MS, HEARTBEAT_INTERVAL_MS, metrics,
+                    METRIC_GROUP_PREFIX, time, RETRY_BACKOFF_MS);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
 
         @Override
@@ -592,14 +670,22 @@ public class AbstractCoordinatorTest {
 
         @Override
         protected void onJoinPrepare(int generation, String memberId) {
+<<<<<<< HEAD
             onJoinPrepareInvokes++;
+=======
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
 
         @Override
         protected void onJoinComplete(int generation, String memberId, String protocol, ByteBuffer memberAssignment) {
+<<<<<<< HEAD
             if (wakeupOnJoinComplete)
                 throw new WakeupException();
             onJoinCompleteInvokes++;
+=======
+
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
     }
 

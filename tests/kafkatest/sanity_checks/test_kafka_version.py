@@ -19,7 +19,11 @@ from ducktape.mark.resource import cluster
 from kafkatest.services.kafka import KafkaService, config_property
 from kafkatest.services.zookeeper import ZookeeperService
 from kafkatest.utils import is_version
+<<<<<<< HEAD
 from kafkatest.version import LATEST_0_8_2, DEV_BRANCH
+=======
+from kafkatest.version import LATEST_0_8_2, TRUNK
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 
 class KafkaVersionTest(Test):

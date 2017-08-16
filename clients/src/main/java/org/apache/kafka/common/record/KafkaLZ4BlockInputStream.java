@@ -35,10 +35,15 @@ import static org.apache.kafka.common.record.KafkaLZ4BlockOutputStream.MAGIC;
 
 /**
  * A partial implementation of the v1.5.1 LZ4 Frame format.
+<<<<<<< HEAD
  *
  * @see <a href="https://github.com/lz4/lz4/wiki/lz4_Frame_format.md">LZ4 Frame Format</a>
  *
  * This class is not thread-safe.
+=======
+ *
+ * @see <a href="http://cyan4973.github.io/lz4/lz4_Frame_format.html">LZ4 Frame Format</a>
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
  */
 public final class KafkaLZ4BlockInputStream extends InputStream {
 
@@ -47,6 +52,7 @@ public final class KafkaLZ4BlockInputStream extends InputStream {
     public static final String BLOCK_HASH_MISMATCH = "Block checksum mismatch";
     public static final String DESCRIPTOR_HASH_MISMATCH = "Stream frame descriptor corrupted";
 
+<<<<<<< HEAD
     private static final LZ4SafeDecompressor DECOMPRESSOR = LZ4Factory.fastestInstance().safeDecompressor();
     private static final XXHash32 CHECKSUM = XXHashFactory.fastestInstance().hash32();
 
@@ -56,6 +62,14 @@ public final class KafkaLZ4BlockInputStream extends InputStream {
     private final ByteBuffer decompressionBuffer;
     // `flg` and `maxBlockSize` are effectively final, they are initialised in the `readHeader` method that is only
     // invoked from the constructor
+=======
+    private final LZ4SafeDecompressor decompressor;
+    private final XXHash32 checksum;
+    private final byte[] buffer;
+    private final byte[] compressedBuffer;
+    private final int maxBlockSize;
+    private final boolean ignoreFlagDescriptorChecksum;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     private FLG flg;
     private int maxBlockSize;
 
@@ -67,6 +81,7 @@ public final class KafkaLZ4BlockInputStream extends InputStream {
     /**
      * Create a new {@link InputStream} that will decompress data using the LZ4 algorithm.
      *
+<<<<<<< HEAD
      * @param in The byte buffer to decompress
      * @param ignoreFlagDescriptorChecksum for compatibility with old kafka clients, ignore incorrect HC byte
      * @throws IOException
@@ -75,6 +90,17 @@ public final class KafkaLZ4BlockInputStream extends InputStream {
         this.ignoreFlagDescriptorChecksum = ignoreFlagDescriptorChecksum;
         this.in = in.duplicate().order(ByteOrder.LITTLE_ENDIAN);
         this.bufferSupplier = bufferSupplier;
+=======
+     * @param in The stream to decompress
+     * @param ignoreFlagDescriptorChecksum for compatibility with old kafka clients, ignore incorrect HC byte
+     * @throws IOException
+     */
+    public KafkaLZ4BlockInputStream(InputStream in, boolean ignoreFlagDescriptorChecksum) throws IOException {
+        super(in);
+        decompressor = LZ4Factory.fastestInstance().safeDecompressor();
+        checksum = XXHashFactory.fastestInstance().hash32();
+        this.ignoreFlagDescriptorChecksum = ignoreFlagDescriptorChecksum;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         readHeader();
         decompressionBuffer = bufferSupplier.get(maxBlockSize);
         if (!decompressionBuffer.hasArray() || decompressionBuffer.arrayOffset() != 0) {
@@ -86,6 +112,19 @@ public final class KafkaLZ4BlockInputStream extends InputStream {
     }
 
     /**
+<<<<<<< HEAD
+=======
+     * Create a new {@link InputStream} that will decompress data using the LZ4 algorithm.
+     *
+     * @param in The stream to decompress
+     * @throws IOException
+     */
+    public KafkaLZ4BlockInputStream(InputStream in) throws IOException {
+        this(in, false);
+    }
+
+    /**
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      * Check whether KafkaLZ4BlockInputStream is configured to ignore the
      * Frame Descriptor checksum, which is useful for compatibility with
      * old client implementations that use incorrect checksum calculations.
@@ -95,12 +134,17 @@ public final class KafkaLZ4BlockInputStream extends InputStream {
     }
 
     /**
+<<<<<<< HEAD
      * Reads the magic number and frame descriptor from input buffer.
+=======
+     * Reads the magic number and frame descriptor from the underlying {@link InputStream}.
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
      *
      * @throws IOException
      */
     private void readHeader() throws IOException {
         // read first 6 bytes into buffer to check magic and FLG/BD descriptor flags
+<<<<<<< HEAD
         if (in.remaining() < 6) {
             throw new IOException(PREMATURE_EOS);
         }
@@ -138,7 +182,37 @@ public final class KafkaLZ4BlockInputStream extends InputStream {
         in.position(in.position() + len);
         if (in.get() != (byte) ((hash >> 8) & 0xFF)) {
             throw new IOException(DESCRIPTOR_HASH_MISMATCH);
+=======
+        int headerOffset = 6;
+        if (in.read(header, 0, headerOffset) != headerOffset) {
+            throw new IOException(PREMATURE_EOS);
         }
+
+        if (MAGIC != Utils.readUnsignedIntLE(header, headerOffset - 6)) {
+            throw new IOException(NOT_SUPPORTED);
+        }
+        flg = FLG.fromByte(header[headerOffset - 2]);
+        bd = BD.fromByte(header[headerOffset - 1]);
+
+        if (flg.isContentSizeSet()) {
+            if (in.read(header, headerOffset, 8) != 8)
+                throw new IOException(PREMATURE_EOS);
+            headerOffset += 8;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
+        }
+
+        // Final byte of Frame Descriptor is HC checksum
+        header[headerOffset++] = (byte) in.read();
+
+        // Old implementations produced incorrect HC checksums
+        if (ignoreFlagDescriptorChecksum)
+            return;
+
+        int offset = 4;
+        int len = headerOffset - offset - 1; // dont include magic bytes or HC
+        byte hash = (byte) ((checksum.hash(header, offset, len, 0) >> 8) & 0xFF);
+        if (hash != header[headerOffset - 1])
+            throw new IOException(DESCRIPTOR_HASH_MISMATCH);
     }
 
     /**
@@ -160,7 +234,11 @@ public final class KafkaLZ4BlockInputStream extends InputStream {
         if (blockSize == 0) {
             finished = true;
             if (flg.isContentChecksumSet())
+<<<<<<< HEAD
                 in.getInt(); // TODO: verify this content checksum
+=======
+                Utils.readUnsignedIntLE(in); // TODO: verify this content checksum
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             return;
         } else if (blockSize > maxBlockSize) {
             throw new IOException(String.format("Block size %s exceeded max: %s", blockSize, maxBlockSize));

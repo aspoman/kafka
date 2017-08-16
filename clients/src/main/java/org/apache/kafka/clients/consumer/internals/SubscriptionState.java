@@ -337,9 +337,16 @@ public class SubscriptionState {
 
     public Map<TopicPartition, OffsetAndMetadata> allConsumed() {
         Map<TopicPartition, OffsetAndMetadata> allConsumed = new HashMap<>();
+<<<<<<< HEAD
         for (PartitionStates.PartitionState<TopicPartitionState> state : assignment.partitionStates()) {
             if (state.value().hasValidPosition())
                 allConsumed.put(state.topicPartition(), new OffsetAndMetadata(state.value().position));
+=======
+        for (Map.Entry<TopicPartition, TopicPartitionState> entry : assignment.entrySet()) {
+            TopicPartitionState state = entry.getValue();
+            if (state.hasValidPosition())
+                allConsumed.put(entry.getKey(), new OffsetAndMetadata(state.position));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         }
         return allConsumed;
     }
@@ -364,9 +371,15 @@ public class SubscriptionState {
         return assignedState(partition).resetStrategy;
     }
 
+<<<<<<< HEAD
     public boolean hasAllFetchPositions(Collection<TopicPartition> partitions) {
         for (TopicPartition partition : partitions)
             if (!hasValidPosition(partition))
+=======
+    public boolean hasAllFetchPositions() {
+        for (TopicPartitionState state : assignment.values())
+            if (!state.hasValidPosition())
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 return false;
         return true;
     }
@@ -377,10 +390,16 @@ public class SubscriptionState {
 
     public Set<TopicPartition> missingFetchPositions() {
         Set<TopicPartition> missing = new HashSet<>();
+<<<<<<< HEAD
         for (PartitionStates.PartitionState<TopicPartitionState> state : assignment.partitionStates()) {
             if (!state.value().hasValidPosition())
                 missing.add(state.topicPartition());
         }
+=======
+        for (Map.Entry<TopicPartition, TopicPartitionState> entry : assignment.entrySet())
+            if (!entry.getValue().hasValidPosition())
+                missing.add(entry.getKey());
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         return missing;
     }
 
@@ -434,8 +453,11 @@ public class SubscriptionState {
 
     private static class TopicPartitionState {
         private Long position; // last consumed position
+<<<<<<< HEAD
         private Long highWatermark; // the high watermark from last fetch
         private Long lastStableOffset;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         private OffsetAndMetadata committed;  // last committed position
         private boolean paused;  // whether this partition has been paused by the user
         private OffsetResetStrategy resetStrategy;  // the strategy to use if the offset needs resetting

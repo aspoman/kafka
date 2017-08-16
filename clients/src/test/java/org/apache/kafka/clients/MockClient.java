@@ -26,7 +26,10 @@ import org.apache.kafka.test.TestUtils;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+<<<<<<< HEAD
 import java.util.Collections;
+=======
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -53,7 +56,11 @@ public class MockClient implements KafkaClient {
         public final RequestMatcher requestMatcher;
         public Node node;
 
+<<<<<<< HEAD
         public FutureResponse(AbstractResponse responseBody, boolean disconnected, RequestMatcher requestMatcher, Node node) {
+=======
+        public FutureResponse(Struct responseBody, boolean disconnected, RequestMatcher requestMatcher, Node node) {
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             this.responseBody = responseBody;
             this.disconnected = disconnected;
             this.requestMatcher = requestMatcher;
@@ -69,10 +76,15 @@ public class MockClient implements KafkaClient {
     private Node node = null;
     private final Set<String> ready = new HashSet<>();
     private final Map<Node, Long> blackedOut = new HashMap<>();
+<<<<<<< HEAD
     // Use concurrent queue for requests so that requests may be queried from a different thread
     private final Queue<ClientRequest> requests = new ConcurrentLinkedDeque<>();
     // Use concurrent queue for responses so that responses may be updated during poll() from a different thread.
     private final Queue<ClientResponse> responses = new ConcurrentLinkedDeque<>();
+=======
+    private final Queue<ClientRequest> requests = new ArrayDeque<>();
+    private final Queue<ClientResponse> responses = new ArrayDeque<>();
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     private final Queue<FutureResponse> futureResponses = new ArrayDeque<>();
     private final Queue<MetadataUpdate> metadataUpdates = new ArrayDeque<>();
     private volatile NodeApiVersions nodeApiVersions = NodeApiVersions.create();
@@ -148,6 +160,7 @@ public class MockClient implements KafkaClient {
         Iterator<FutureResponse> iterator = futureResponses.iterator();
         while (iterator.hasNext()) {
             FutureResponse futureResp = iterator.next();
+<<<<<<< HEAD
             if (futureResp.node != null && !request.destination().equals(futureResp.node.idString()))
                 continue;
 
@@ -158,11 +171,24 @@ public class MockClient implements KafkaClient {
                 throw new IllegalStateException("Request matcher did not match next-in-line request " + abstractRequest);
             ClientResponse resp = new ClientResponse(request.makeHeader(version), request.callback(), request.destination(),
                     request.createdTimeMs(), time.milliseconds(), futureResp.disconnected, null, futureResp.responseBody);
+=======
+            if (futureResp.node != null && !request.request().destination().equals(futureResp.node.idString()))
+                continue;
+
+            if (!futureResp.requestMatcher.matches(request))
+                throw new IllegalStateException("Next in line response did not match expected request");
+
+            ClientResponse resp = new ClientResponse(request, time.milliseconds(), futureResp.disconnected, futureResp.responseBody);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
             responses.add(resp);
             iterator.remove();
             return;
         }
 
+<<<<<<< HEAD
+=======
+        request.setSendTimeMs(now);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
         this.requests.add(request);
     }
 
@@ -236,12 +262,38 @@ public class MockClient implements KafkaClient {
         throw new IllegalArgumentException("No requests available to node " + node);
     }
 
+<<<<<<< HEAD
     public void prepareResponse(AbstractResponse response) {
         prepareResponse(ALWAYS_TRUE, response, false);
     }
 
     public void prepareResponseFrom(AbstractResponse response, Node node) {
         prepareResponseFrom(ALWAYS_TRUE, response, node, false);
+=======
+    public void respondFrom(Struct body, Node node) {
+        respondFrom(body, node, false);
+    }
+
+    public void respondFrom(Struct body, Node node, boolean disconnected) {
+        Iterator<ClientRequest> iterator = requests.iterator();
+        while (iterator.hasNext()) {
+            ClientRequest request = iterator.next();
+            if (request.request().destination().equals(node.idString())) {
+                iterator.remove();
+                responses.add(new ClientResponse(request, time.milliseconds(), disconnected, body));
+                return;
+            }
+        }
+        throw new IllegalArgumentException("No requests available to node " + node);
+    }
+
+    public void prepareResponse(Struct body) {
+        prepareResponse(ALWAYS_TRUE, body, false);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
+    }
+
+    public void prepareResponseFrom(Struct body, Node node) {
+        prepareResponseFrom(ALWAYS_TRUE, body, node, false);
     }
 
     /**
@@ -258,12 +310,25 @@ public class MockClient implements KafkaClient {
         prepareResponseFrom(matcher, response, node, false);
     }
 
+<<<<<<< HEAD
     public void prepareResponse(AbstractResponse response, boolean disconnected) {
         prepareResponse(ALWAYS_TRUE, response, disconnected);
     }
 
     public void prepareResponseFrom(AbstractResponse response, Node node, boolean disconnected) {
         prepareResponseFrom(ALWAYS_TRUE, response, node, disconnected);
+=======
+    public void prepareResponseFrom(RequestMatcher matcher, Struct body, Node node) {
+        prepareResponseFrom(matcher, body, node, false);
+    }
+
+    public void prepareResponse(Struct body, boolean disconnected) {
+        prepareResponse(ALWAYS_TRUE, body, disconnected);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
+    }
+
+    public void prepareResponseFrom(Struct body, Node node, boolean disconnected) {
+        prepareResponseFrom(ALWAYS_TRUE, body, node, disconnected);
     }
 
     /**
@@ -273,6 +338,7 @@ public class MockClient implements KafkaClient {
      * @param response The response body
      * @param disconnected Whether the request was disconnected
      */
+<<<<<<< HEAD
     public void prepareResponse(RequestMatcher matcher, AbstractResponse response, boolean disconnected) {
         prepareResponseFrom(matcher, response, null, disconnected);
     }
@@ -301,6 +367,14 @@ public class MockClient implements KafkaClient {
 
     public void prepareMetadataUpdate(Cluster cluster, Set<String> unavailableTopics) {
         metadataUpdates.add(new MetadataUpdate(cluster, unavailableTopics));
+=======
+    public void prepareResponse(RequestMatcher matcher, Struct body, boolean disconnected) {
+        prepareResponseFrom(matcher, body, null, disconnected);
+    }
+
+    public void prepareResponseFrom(RequestMatcher matcher, Struct body, Node node, boolean disconnected) {
+        futureResponses.add(new FutureResponse(body, disconnected, matcher, node));
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 
     public void setNode(Node node) {

@@ -307,6 +307,7 @@ public class SaslServerAuthenticator implements Authenticator {
 
             if (!Protocol.apiVersionSupported(requestHeader.apiKey(), requestHeader.apiVersion())) {
                 if (apiKey == ApiKeys.API_VERSIONS)
+<<<<<<< HEAD
                     sendKafkaResponse(ApiVersionsResponse.unsupportedVersionSend(node, requestHeader));
                 else
                     throw new UnsupportedVersionException("Version " + requestHeader.apiVersion() + " is not supported for apiKey " + apiKey);
@@ -321,6 +322,21 @@ public class SaslServerAuthenticator implements Authenticator {
                         Struct struct = ApiKeys.SASL_HANDSHAKE.parseRequest(version, requestBuffer);
                         SaslHandshakeRequest saslHandshakeRequest = new SaslHandshakeRequest(struct, version);
                         clientMechanism = handleHandshakeRequest(requestHeader, saslHandshakeRequest);
+=======
+                    sendKafkaResponse(requestHeader, ApiVersionsResponse.fromError(Errors.UNSUPPORTED_VERSION));
+                else
+                    throw new UnsupportedVersionException("Version " + requestHeader.apiVersion() + " is not supported for apiKey " + apiKey);
+            } else {
+                AbstractRequest request = AbstractRequest.getRequest(requestHeader.apiKey(), requestHeader.apiVersion(), requestBuffer);
+
+                LOG.debug("Handle Kafka request {}", apiKey);
+                switch (apiKey) {
+                    case API_VERSIONS:
+                        handleApiVersionsRequest(requestHeader, (ApiVersionsRequest) request);
+                        break;
+                    case SASL_HANDSHAKE:
+                        clientMechanism = handleHandshakeRequest(requestHeader, (SaslHandshakeRequest) request);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                         break;
                     default:
                         throw new IllegalSaslStateException("Unexpected Kafka request of type " + apiKey + " during SASL handshake.");
@@ -328,7 +344,11 @@ public class SaslServerAuthenticator implements Authenticator {
             }
         } catch (SchemaException | IllegalArgumentException e) {
             if (saslState == SaslState.GSSAPI_OR_HANDSHAKE_REQUEST) {
+<<<<<<< HEAD
                 // SchemaException is thrown if the request is not in Kafka format. IllegalArgumentException is thrown
+=======
+                // SchemaException is thrown if the request is not in Kafka format. IIlegalArgumentException is thrown
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
                 // if the API key is invalid. For compatibility with 0.9.0.x where the first packet is a GSSAPI token
                 // starting with 0x60, revert to GSSAPI for both these exceptions.
                 if (LOG.isDebugEnabled()) {

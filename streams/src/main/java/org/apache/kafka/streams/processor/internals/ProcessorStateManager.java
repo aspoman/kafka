@@ -155,11 +155,46 @@ public class ProcessorStateManager implements StateManager {
         }
 
         // check that the underlying change log topic exist or not
+<<<<<<< HEAD
         final String topic = storeToChangelogTopic.get(store.name());
         if (topic == null) {
             stores.put(store.name(), store);
             return;
         }
+=======
+        String topic;
+        if (loggingEnabled)
+            topic = storeChangelogTopic(this.applicationId, store.name());
+        else topic = store.name();
+
+        // block until the partition is ready for this state changelog topic or time has elapsed
+        int partition = getPartition(topic);
+        boolean partitionNotFound = true;
+        long startTime = System.currentTimeMillis();
+        long waitTime = 5000L;      // hard-code the value since we should not block after KIP-4
+
+        do {
+            try {
+                Thread.sleep(50L);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+
+            List<PartitionInfo> partitionInfos = restoreConsumer.partitionsFor(topic);
+            if (partitionInfos == null) {
+                throw new StreamsException("Could not find partition info for topic: " + topic);
+            }
+            for (PartitionInfo partitionInfo : partitionInfos) {
+                if (partitionInfo.partition() == partition) {
+                    partitionNotFound = false;
+                    break;
+                }
+            }
+        } while (partitionNotFound && System.currentTimeMillis() < startTime + waitTime);
+
+        if (partitionNotFound)
+            throw new StreamsException("Store " + store.name() + "'s change log (" + topic + ") does not contain partition " + partition);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         final TopicPartition storePartition = new TopicPartition(topic, getPartition(topic));
         changelogReader.validatePartitionExists(storePartition, store.name());

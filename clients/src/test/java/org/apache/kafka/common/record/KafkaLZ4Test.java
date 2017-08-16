@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements. See the NOTICE file distributed with
@@ -5,6 +6,15 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
+=======
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
@@ -16,6 +26,7 @@
  */
 package org.apache.kafka.common.record;
 
+<<<<<<< HEAD
 import net.jpountz.xxhash.XXHashFactory;
 
 import org.hamcrest.CoreMatchers;
@@ -30,10 +41,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+=======
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+<<<<<<< HEAD
 import java.util.Random;
 
 import static org.apache.kafka.common.record.KafkaLZ4BlockOutputStream.LZ4_FRAME_INCOMPRESSIBLE_MASK;
@@ -41,10 +62,20 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+=======
+
+import net.jpountz.xxhash.XXHashFactory;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
 @RunWith(value = Parameterized.class)
 public class KafkaLZ4Test {
 
+<<<<<<< HEAD
     private final static Random RANDOM = new Random(0);
 
     private final boolean useBrokenFlagDescriptorChecksum;
@@ -176,17 +207,62 @@ public class KafkaLZ4Test {
         assertEquals(0x22, compressed[offset++]);
         assertEquals(0x4D, compressed[offset++]);
         assertEquals(0x18, compressed[offset++]);
+=======
+    private final boolean useBrokenFlagDescriptorChecksum;
+    private final boolean ignoreFlagDescriptorChecksum;
+    private final byte[] payload;
+
+    public KafkaLZ4Test(boolean useBrokenFlagDescriptorChecksum, boolean ignoreFlagDescriptorChecksum, byte[] payload) {
+        this.useBrokenFlagDescriptorChecksum = useBrokenFlagDescriptorChecksum;
+        this.ignoreFlagDescriptorChecksum = ignoreFlagDescriptorChecksum;
+        this.payload = payload;
+    }
+
+    @Parameters
+    public static Collection<Object[]> data() {
+        byte[] payload = new byte[1000];
+        Arrays.fill(payload, (byte) 1);
+        List<Object[]> values = new ArrayList<Object[]>();
+        for (boolean broken : Arrays.asList(false, true))
+            for (boolean ignore : Arrays.asList(false, true))
+                values.add(new Object[] {broken, ignore, payload});
+        return values;
+    }
+
+    @Test
+    public void testKafkaLZ4() throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        KafkaLZ4BlockOutputStream lz4 = new KafkaLZ4BlockOutputStream(output, this.useBrokenFlagDescriptorChecksum);
+        lz4.write(this.payload, 0, this.payload.length);
+        lz4.flush();
+        byte[] compressed = output.toByteArray();
+
+        // Check magic bytes stored as little-endian
+        int offset = 0;
+        assertEquals(compressed[offset++], 0x04);
+        assertEquals(compressed[offset++], 0x22);
+        assertEquals(compressed[offset++], 0x4D);
+        assertEquals(compressed[offset++], 0x18);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         // Check flg descriptor
         byte flg = compressed[offset++];
 
         // 2-bit version must be 01
         int version = (flg >>> 6) & 3;
+<<<<<<< HEAD
         assertEquals(1, version);
 
         // Reserved bits should always be 0
         int reserved = flg & 3;
         assertEquals(0, reserved);
+=======
+        assertEquals(version, 1);
+
+        // Reserved bits should always be 0
+        int reserved = flg & 3;
+        assertEquals(reserved, 0);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         // Check block descriptor
         byte bd = compressed[offset++];
@@ -199,9 +275,15 @@ public class KafkaLZ4Test {
 
         // Multiple reserved bit ranges in block descriptor
         reserved = bd & 15;
+<<<<<<< HEAD
         assertEquals(0, reserved);
         reserved = (bd >>> 7) & 1;
         assertEquals(0, reserved);
+=======
+        assertEquals(reserved, 0);
+        reserved = (bd >>> 7) & 1;
+        assertEquals(reserved, 0);
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
 
         // If flg descriptor sets content size flag
         // there are 8 additional bytes before checksum
@@ -224,6 +306,7 @@ public class KafkaLZ4Test {
         int hash = XXHashFactory.fastestInstance().hash32().hash(compressed, off, len, 0);
 
         byte hc = compressed[offset++];
+<<<<<<< HEAD
         assertEquals((byte) ((hash >> 8) & 0xFF), hc);
 
         // Check EndMark, data block with size `0` expressed as a 32-bits value
@@ -354,5 +437,19 @@ public class KafkaLZ4Test {
             lz4.flush();
         }
         return output.toByteArray();
+=======
+        assertEquals(hc, (byte) ((hash >> 8) & 0xFF));
+
+        ByteArrayInputStream input = new ByteArrayInputStream(compressed);
+        try {
+            KafkaLZ4BlockInputStream decompressed = new KafkaLZ4BlockInputStream(input, this.ignoreFlagDescriptorChecksum);
+            byte[] testPayload = new byte[this.payload.length];
+            int ret = decompressed.read(testPayload, 0, this.payload.length);
+            assertEquals(ret, this.payload.length);
+            assertArrayEquals(this.payload, testPayload);
+        } catch (IOException e) {
+            assertTrue(this.useBrokenFlagDescriptorChecksum && !this.ignoreFlagDescriptorChecksum);
+        }
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
     }
 }

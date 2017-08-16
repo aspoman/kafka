@@ -176,12 +176,20 @@ class ControlledShutdownLeaderSelector(controllerContext: ControllerContext) ext
     val assignedReplicas = controllerContext.partitionReplicaAssignment(topicAndPartition)
     val liveAssignedReplicas = assignedReplicas.filter(r => controllerContext.isReplicaOnline(r, topicAndPartition, true))
 
+<<<<<<< HEAD
     val newIsr = currentIsr.filter(brokerId => !controllerContext.shuttingDownBrokerIds.contains(brokerId))
     liveAssignedReplicas.find(newIsr.contains) match {
       case Some(newLeader) =>
         debug(s"Partition $topicAndPartition : current leader = ${currentLeaderAndIsr.leader}, new leader = $newLeader")
         val newLeaderAndIsr = currentLeaderAndIsr.newLeaderAndIsr(newLeader, newIsr)
         (newLeaderAndIsr, liveAssignedReplicas)
+=======
+    val newIsr = currentLeaderAndIsr.isr.filter(brokerId => !controllerContext.shuttingDownBrokerIds.contains(brokerId))
+    liveAssignedReplicas.filter(newIsr.contains).headOption match {
+      case Some(newLeader) =>
+        debug("Partition %s : current leader = %d, new leader = %d".format(topicAndPartition, currentLeader, newLeader))
+        (LeaderAndIsr(newLeader, currentLeaderEpoch + 1, newIsr, currentLeaderIsrZkPathVersion + 1), liveAssignedReplicas)
+>>>>>>> 065899a3bc330618e420673acf9504d123b800f3
       case None =>
         throw new StateChangeFailedException(s"No other replicas in ISR ${currentIsr.mkString(",")} for $topicAndPartition " +
           s"besides shutting down brokers ${controllerContext.shuttingDownBrokerIds.mkString(",")}")
