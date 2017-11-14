@@ -41,3 +41,6 @@ tests/.ducktape
 .cache
 
 docs/generated/
+
+tmp
+out

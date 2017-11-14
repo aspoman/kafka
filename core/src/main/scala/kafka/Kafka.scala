@@ -26,6 +26,13 @@ import org.apache.kafka.common.utils.Utils
 
 import scala.collection.JavaConversions._
 
+/**
+  * kafka 启动类
+  * 1. main函数加载配置文件
+  * 2. 创建 kafkaServerStartable 对象
+  * 3. 创建钩子函数
+  * 4. 通过 kafkaServerStartable.startUp 启动 KafkaServer 等一系列服务
+  */
 object Kafka extends Logging {
 
   def getPropsFromArgs(args: Array[String]): Properties = {
